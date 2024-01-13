@@ -1,0 +1,9 @@
+[auth]
+user = "mborsali"
+password = "wbonatt1.6"
+
+[server]
+url = "https://jira.devtools.intel.com"
+
+[proj]
+json = "/home/mborsali/.config/jiner/sicoe.json"

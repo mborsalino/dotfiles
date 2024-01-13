@@ -1,0 +1,55 @@
+# enable mouse
+set mouse = true
+
+# shift-r starts an interactive rebase up to the highlighted commit
+# This overrides shift-r as refresh. Use F5 to refresh instead
+bind main R !git rebase -i %(commit)^
+
+# Settings
+# --------
+# Most of these settings can be toggleable, either via the toggle-*
+# actions or via the option menu (bound to `o` by default).
+
+# View settings
+#
+# Supported column types and their options:
+#
+#   author
+#    - display (enum) [no|full|abbreviated|email|email-user]
+#                                       : Show author information?
+#   commit-title
+#    - display (bool)                   : Show the commit title?
+#    - graph (enum) [no|v2|v1]          : Show the commit graph? (main view only)
+#    - refs (bool)                      : Show branches, tags and remotes? (main view only)
+#    - overflow (boolint)               : Highlight overflows? Defaults to 50 when enabled.
+#
+#   date
+#    - display (enum) [no|default|local|relative|short]
+#                                       : Show dates?
+#   file-name
+#    - display (enum) [no|always|auto]  : Show file names?
+#
+#   file-size
+#    - display (enum) [no|default|units]        : Show file sizes?
+#
+#   id
+#    - display (bool)                   : Show commit/tree ID?
+#
+#   line-number
+#    - display (bool)                   : Show line numbers?
+#    - interval (int)                   : Interval between line numbers; defaults to 5
+#
+#   mode
+#    - display (bool)                   : Show file modes?
+#
+#   status
+#    - display (enum) [no|short|long]   : Show status label?
+#
+#   text
+#    - display (bool)                   : Show text?
+#    - commit-title-overflow (boolint)  : Highlight overflow in log and diff view?
+#
+# All columns also support a width option to configure the max width of
+# the column. Use zero (the default value) to auto-size the column based
+# on the content.
+set main-view = line-number:no,interval=5 id:yes date:no author:abbreviated commit-title:yes,graph,refs,overflow=no

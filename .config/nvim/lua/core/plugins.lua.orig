@@ -1,0 +1,40 @@
+  -- Navigate files/folder
+  use 'luukvbaal/nnn.nvim'
+  use {
+      'nvim-tree/nvim-tree.lua',
+      run = ":TSUPdate"
+  }
+
+  -- LSP Support
+  use {
+    'VonHeikemen/lsp-zero.nvim',
+    branch = 'v2.x',
+    requires = {
+      {'neovim/nvim-lspconfig'},
+      {
+        'williamboman/mason.nvim',
+        run = function()
+          pcall(vim.cmd, 'MasonUpdate')
+        end,
+      },
+      {'williamboman/mason-lspconfig.nvim'},
+
+      -- Autocompletion
+      {'hrsh7th/cmp-nvim-lsp'},
+      {'hrsh7th/cmp-buffer'},
+      {'FelipeLema/cmp-async-path'},
+
+      {'hrsh7th/vim-vsnip'},
+      {'hrsh7th/cmp-cmdline'},
+      {'hrsh7th/cmp-vsnip'},
+      {'hrsh7th/nvim-cmp'},
+      {'hrsh7th/cmp-nvim-lsp-signature-help'},
+
+    }
+}
+
+    -- Toggle LSP on/off
+use {
+    'WhoIsSethDaniel/toggle-lsp-diagnostics.nvim',
+    commit = 'a7839742dadf90177f3a9ea4747e79f404d10af3'
+}

@@ -1,0 +1,629 @@
+set nocompatible
+
+"----------------------------------------------------------------------------------------------------------------------"
+" VIM-PLUG (Plugin-manager) section
+"    (keep this at the top)
+"----------------------------------------------------------------------------------------------------------------------"
+" Specify a directory for plugins
+" - For Neovim: stdpath('data') . '/plugged'
+" - Avoid using standard Vim directory names like 'plugin'
+call plug#begin('~/.vim/plugged')
+
+" Make sure you use single quotes
+
+" Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
+"Plug 'junegunn/vim-easy-align'
+Plug 'junegunn/seoul256.vim'
+
+" Plug 'w0rp/ale'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'majutsushi/tagbar'
+Plug 'chrisbra/Colorizer'
+if !has('nvim')
+    Plug 'nvim-lualine/lualine.nvim'
+endif
+Plug 'tpope/vim-fugitive'
+Plug 'preservim/nerdtree'
+Plug 'jistr/vim-nerdtree-tabs'
+" if !has('nvim')
+    " Plug 'mcchrish/nnn.vim'
+" endif
+Plug 'luukvbaal/nnn.nvim'
+Plug 'vim-scripts/Rename2'
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
+" Plug 'weynhamz/vim-plugin-minibufexpl'
+Plug 'airblade/vim-rooter'
+Plug 'airblade/vim-gitgutter'
+Plug 'chrisbra/csv.vim'
+Plug 'dkprice/vim-easygrep'
+Plug 'Yggdroot/indentLine'
+Plug 'rust-lang/rust.vim'
+" Plug 'ycm-core/YouCompleteMe' 
+" Plug 'ludovicchabant/vim-gutentags'
+Plug 'Yilin-Yang/vim-markbar'
+Plug 'skywind3000/vim-quickui' 
+if !has('nvim') && has('lua')
+    Plug 'jeaye/color_coded'
+endif
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-obsession'
+Plug 'gcmt/taboo.vim'
+Plug 'nanotee/zoxide.vim'
+
+Plug 'wincent/ferret'
+Plug 'stefandtw/quickfix-reflector.vim'
+
+Plug 'dyng/ctrlsf.vim'
+
+"
+" Any valid git URL is allowed
+"Plug 'https://github.com/junegunn/vim-github-dashboard.git'
+
+" Multiple Plug commands can be written in a single line using | separators
+"Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+
+" On-demand loading
+"Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+"Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
+
+" Using a non-master branch
+"Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
+
+" Using a tagged release; wildcard allowed (requires git 1.9.2 or above)
+"Plug 'fatih/vim-go', { 'tag': '*' }
+
+" Plugin options
+"Plug 'nsf/gocode', { 'tag': 'v.20150303', 'rtp': 'vim' }
+
+" Plugin outside ~/.vim/plugged with post-update hook
+"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+
+" Unmanaged plugin (manually installed and updated)
+"Plug '~/my-prototype-plugin'
+
+" Initialize plugin system
+call plug#end()
+
+
+"----------------------------------------------------------------------------------------------------------------------"
+" Global Settings
+"----------------------------------------------------------------------------------------------------------------------"
+" make backspace work as expected
+  set backspace=indent,eol,start
+
+" [global] set nowrap        do not wrap lines (use set wrap! from inside vim to manually toggle this)
+  set nowrap
+
+" [global] writebackup       make a backup before overwriting a file
+  set wb
+
+" [global] backupdir         list of directories for the backup file and swap file
+  if (&term == "win32" || "pcterm" || has("gui_win32"))
+    set bdir=$VIM\backup
+    set directory=$VIM\backup
+  else
+    set bdir=$HOME/tmp/.vimbk
+    set directory=$HOME/tmp/.vimbk
+  endif
+
+" [global] undodir           directory for persistent undo
+  if (&term == "win32" || "pcterm" || has("gui_win32"))
+    set undodir=$VIM\undo
+  else
+    set undodir=$HOME/tmp/.vimundo
+  endif
+
+" insert space characters whenever the tab key is pressed
+    set expandtab
+
+" set number of spaces that <Tab> uses while editing
+    set tabstop=4
+
+" set number of space characters inserted for indentation
+    set shiftwidth=4
+
+" set number of space characters deleted for deindentation
+    set softtabstop=4
+
+" highlight all searches (hlsearch/nohlsearch)
+    set hlsearch 
+
+"  use space as leader key
+:let mapleader = " "
+
+" Print Options "
+if !has('nvim')
+    set popt=paper:letter
+endif
+
+" Mouse support in alacritty
+set mouse=a
+
+" Make mouse work also on very wide monitors
+if !(has('nvim'))
+    if has("mouse_sgr")
+        set ttymouse=sgr
+    else
+        set ttymouse=xterm2
+    end
+endif
+
+" Bash-like autocompletion when opening a file via :e
+" set wildmode=longest:full,full
+set wildmode=longest,list,full
+set wildmenu
+
+" set gui font
+    " set guifont=Lucida_Console:h9:cANSI
+"     set guifont=Bitstream\ Vera\ Sans\ Mono\ 9
+     set guifont=Inconsolata
+autocmd BufRead *.py set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
+autocmd BufRead *.ipy set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
+
+"----------------------------------------------------------------------------------------------------------------------"
+" Appearance
+"----------------------------------------------------------------------------------------------------------------------"
+"
+" Force the underlying terminal to use 256 colors
+if has("gui_running")
+    set t_Co=256
+endif
+
+" set color scheme
+" colorscheme slate
+let g:seoul256_background = 235
+let g:seoul256_light_background = 256
+" let g:seoul256_srgb = 1
+colorscheme seoul256
+
+
+"----------------------------------------------------------------------------------------------------------------------"
+" Custom Functions
+"----------------------------------------------------------------------------------------------------------------------"
+
+" Print current buffer to file, according to current color scheme "
+function! Print_old()
+    hardcopy > /tmp/vim_tmp_for_print.ps
+    "exec system("lpr -P sv-prn-4520c-01 -o portrait -o Finisher=Staple1 -o Pedestal=Drawer2 -o PageSize=Letter -o PageRegion=Letter -o InputSlot=Auto -o Duplex=DuplexNoTumble -o Collate=True -o OutputTray=Auto -o HolePunch=Off -o Stapling=Off -o PrintMode=Normal -o DeptCode=False -o TonerSave=False -o BlankPage=False -o DCDigit1=0 -o DCDigit2=0 -o DCDigit3=0 -o DCDigit4=0 -o DCDigit5=0 -o DINDigit1=0 -o DINDigit2=0 -o DINDigit3=0 -o DINDigit4=0 -o DINDigit5=0 -o BookletPaperSize=None -o BookletPageLayout=True -o BookletCenterMargin=Off -o BookletOuterMargin=Off -o ColorType=Color -o Halftone=Auto -o DistinguishThinLines=False -o ImageType=General -o BlackOverPrint=False -o PureBlackGray=Off -o ColorBalanceCyan=0 -o ColorBalanceMagenta=0 -o ColorBalanceYellow=0 -o ColorBalanceBlack=0 -o ContrastTOS=0 -o SharpnessTOS=0 -o BrightnessTOS=0 -o SaturationTOS=0  /tmp/vim_tmp_for_print.ps")
+    exec system("lpr -P sv-prn-4520c-01 -o landscape -o Finisher=Staple1 -o Pedestal=Drawer2 -o PageSize=Letter -o PageRegion=Letter -o InputSlot=Auto -o Duplex=DuplexNoTumble -o Collate=True -o OutputTray=Auto -o HolePunch=Off -o Stapling=Off -o PrintMode=Normal -o DeptCode=False -o TonerSave=False -o BlankPage=False -o DCDigit1=0 -o DCDigit2=0 -o DCDigit3=0 -o DCDigit4=0 -o DCDigit5=0 -o DINDigit1=0 -o DINDigit2=0 -o DINDigit3=0 -o DINDigit4=0 -o DINDigit5=0 -o BookletPaperSize=None -o BookletPageLayout=True -o BookletCenterMargin=Off -o BookletOuterMargin=Off -o ColorType=Color -o Halftone=Auto -o DistinguishThinLines=False -o ImageType=General -o BlackOverPrint=False -o PureBlackGray=Off -o ColorBalanceCyan=0 -o ColorBalanceMagenta=0 -o ColorBalanceYellow=0 -o ColorBalanceBlack=0 -o ContrastTOS=0 -o SharpnessTOS=0 -o BrightnessTOS=0 -o SaturationTOS=0  /tmp/vim_tmp_for_print.ps")
+endfunction
+
+" Print current buffer to file, according to current color scheme "
+function! Print(orientation, ...)
+    let usage = "Usage: :call Print(orientation [start_line, end_line])\n\n"
+    let l:usage +=  "Example: Print(landscape)\n"
+
+    " Check orientation (mandatory argument)
+    if a:orientation == "landscape"
+        let is_portrait = "n"
+    elseif a:orientation == "portrait"
+        let is_portrait = "y"
+    else
+        echoerr l:usage
+        return
+    endif
+
+    " Check optional range arguments
+    if a:0 != 2 && a:0 != 0
+        echoerr l:usage
+        return
+    endif
+
+    " Define range no matter what was the input
+    if a:0 == 0
+        let beg = 1
+        let end = '$'
+    else
+        echom "here"
+        let beg = a:1
+        let end = a:2
+    endif
+
+    " Set printing options according to inputs
+    execute "set printoptions=paper:letter,portrait:" . l:is_portrait
+    " Save current colorscheme and switch to colors suitable for priting
+    let color_saved = g:colors_name
+    colo shine
+    " Create postscript file
+    execute beg . "," . end . "hardcopy > /tmp/vim_tmp_for_print.ps"
+    " Restore original colorscheme
+    execute "colorscheme " . l:color_saved
+    " Print ps to file, in color. Note that there is no printoption to force
+    " color and MoSys default is grayscale, so we do need the extra step
+     exec system("lpr -P hp-m477-copy -o ColorType=Color /tmp/vim_tmp_for_print.ps")
+
+endfunction
+
+
+function! SavePs(orientation)
+    set printoptions=paper:letter,orientation:a:orientation
+    hardcopy > /tmp/vim_tmp_for_print.ps
+endfunction
+
+command! -complete=shellcmd -nargs=+ Shell call s:RunShellCommand(<q-args>)
+function! s:RunShellCommand(cmdline)
+  echo a:cmdline
+  let expanded_cmdline = a:cmdline
+  for part in split(a:cmdline, ' ')
+     if part[0] =~ '\v[%#<]'
+        let expanded_part = fnameescape(expand(part))
+        let expanded_cmdline = substitute(expanded_cmdline, part, expanded_part, '')
+     endif
+  endfor
+  botright new
+  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
+  call setline(1, 'You entered:    ' . a:cmdline)
+  call setline(2, 'Expanded Form:  ' .expanded_cmdline)
+  call setline(3,substitute(getline(2),'.','=','g'))
+  execute '$read !'. expanded_cmdline
+  setlocal nomodifiable
+  1
+endfunction
+
+
+" --------------------------------------------- "
+" Zoom / Restore pane                           "
+" --------------------------------------------- "
+function! s:ZoomToggle() abort
+    if exists('t:zoomed') && t:zoomed
+        execute t:zoom_winrestcmd
+        let t:zoomed = 0
+    else
+        let t:zoom_winrestcmd = winrestcmd()
+        resize
+        vertical resize
+        let t:zoomed = 1
+    endif
+endfunction
+command! ZoomToggle call s:ZoomToggle()
+
+
+" --------------------------------------------- "
+" Toggle Location list opened/closed            "
+" --------------------------------------------- "
+function! LocListToggle() abort
+    if exists('t:loclist_visible') && t:loclist_visible
+        lclose
+        let t:loclist_visible = 0
+    else
+        lopen
+        let t:loclist_visible = 1
+    endif
+endfunction
+command! LocToggle call LocListToggle()
+
+" --------------------------------------------- "
+" Set indentation to the given number of spaces "
+" --------------------------------------------- "
+function! s:SetIndent(num_spaces) abort
+    " Convert string to number
+    let ns = str2nr(a:num_spaces)
+
+    " let &var is the same as setting an option called var
+    " let &tabstop=8  ===> set tabstop=8
+    " Using set in the function wouldn't work b/c of type issues
+    let &tabstop = ns
+    let &shiftwidth = ns
+    let &softtabstop = ns
+
+    " The . concatenates strings. Echom evaluates the entire thing
+    " before printing to stdout.
+    echom "Indentation was set to " . a:num_spaces
+endfunction
+command! -nargs=1 SetIndent call s:SetIndent(<f-args>)
+
+
+" Select a jump in the jumplist 
+function! GotoJump()
+  jumps
+  let j = input("Please select your jump: ")
+  if j != ''
+    let pattern = '\v\c^\+'
+    if j =~ pattern
+      let j = substitute(j, pattern, '', 'g')
+      execute "normal " . j . "\<c-i>"
+    else
+      execute "normal " . j . "\<c-o>"
+    endif
+  endif
+endfunction
+nmap <Leader>ji :call GotoJump()<CR>
+
+"----------------------------------------------------------------------------------------------------------------------"
+" Mappings
+"----------------------------------------------------------------------------------------------------------------------"
+
+" CTRL-Z is Undo; not in cmdline though
+noremap <C-Z> u
+inoremap <C-Z> <C-O>u
+
+" CTRL-Y is Redo (although not repeat); not in cmdline though
+noremap <C-Y> <C-R>
+inoremap <C-Y> <C-O><C-R>
+
+" map for quick "change to current directory"
+map ,cd :cd %:p:h<CR>
+
+nmap <F12> :call LocListToggle()<ESC>
+
+" NERDTree shortcuts
+cnoreabbrev ntf NERDTreeFocus
+cnoreabbrev ntt NERDTreeToggle
+
+" TagBar shortcuts
+cnoreabbrev tbarf TagbarOpen j
+cnoreabbrev tbart TagbarToggle
+
+" Zoom pane shortcut
+cnoreabbrev zo ZoomToggle
+
+" Vertical resize (right)
+map <A-Up> :vertical resize +5<CR>
+" map <F6> :vertical resize +5<CR>
+" Vertical resize (left)
+map <A-Down> :vertical resize -5<CR>
+" map <F7> :vertical resize -5<CR>
+"
+
+" Switch focus to Tree viewer
+"
+" Assumes the tree viewer (whether Nnn, NerdTree or others) is on the leftmost
+" pane
+nmap <Leader>tf 1<C-w><C-w>
+
+
+
+"----------------------------------------------------------------------------------------------------------------------"
+" Autocommands
+"----------------------------------------------------------------------------------------------------------------------"
+
+" In text files, always limit the width of text to 78 characters.
+"autocmd BufRead *.txt set textwidth=78
+
+au BufRead,BufNewFile *.stil    setfiletype stil
+au BufRead,BufNewFile *.tcl    setfiletype tcl
+au BufRead,BufNewFile *.pasm   setfiletype pasm
+au BufRead,BufNewFile *.pasm   set syntax=pasm
+
+" au BufRead,BufNewFile *.c      set tabstop=2
+" au BufRead,BufNewFile *.c      set shiftwidth=2
+" au BufRead,BufNewFile *.cpp      set tabstop=4
+" au BufRead,BufNewFile *.cpp      set shiftwidth=4
+"
+au BufRead,BufNewFile *.lua      setlocal shiftwidth=2 tabstop=2 softtabstop=2 expandtab
+au BufRead,BufNewFile *.h        setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab
+au BufRead,BufNewFile *.c        setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab
+au BufRead,BufNewFile *.cpp      setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab
+au BufRead,BufNewFile *.py       setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab
+au BufRead,BufNewFile *.pasm     setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab
+au BufRead,BufNewFile *.uasm     setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab
+
+" Force a syntax highlighting sync when you enter a buffer
+" Normally syntax is cached so this is useful when developing syntax files
+autocmd BufEnter * :syntax sync fromstart
+
+
+" Change shape of cursor in different modes in vim -- commented out b/c it lows things down if gconftool-2 is not installed
+" au InsertEnter * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
+" au InsertLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape block"
+" au VimLeave * silent execute "!gconftool-2 --type string --set /apps/gnome-terminal/profiles/Default/cursor_shape ibeam"
+
+"----------------------------------------------------------------------------------------------------------------------"
+" Plugins
+"----------------------------------------------------------------------------------------------------------------------"
+
+" TagList
+let Tlist_Ctags_Cmd='/home/mborsali/bin/ctags'
+" show tag drop down menu in GVIM
+let Tlist_Show_Menu = 1
+" default behavior is sort by name
+let Tlist_Sort_Type = 'name'
+
+" TagBar
+let tagbar_ctags_bin='/home/mborsali/bin/ctags'
+" let tagbar_ctags_bin='/usr/bin/ctags'
+let g:tagbar_position = 'left'
+" Write rust tags upone saving file
+autocmd BufWritePost *.rs :silent! exec "!rusty-tags vi --quiet --start-dir=" . expand('%:p:h') . "&" | redraw!
+
+" EasyTag
+" let g:easytags_cmd = '/home/mborsalino/local/bin/ctags'
+" let g:easytags_file = '/home/mborsalino/.vimtagsdir'
+let g:easytags_auto_update = 0
+let g:easytags_always_enabled = 0
+" let g:easytags_by_filetype = '/home/mborsalino/.vimtagsdir'
+let g:easytags_auto_highlight = 0
+
+" air-line
+let g:airline_powerline_fonts = 1
+"
+" if !exists('g:airline_symbols')
+"     let g:airline_symbols = {}
+" endif
+" "
+"     " unicode symbols
+"     let g:airline_left_sep = '»'
+"     let g:airline_left_sep = '▶'
+"     let g:airline_right_sep = '«'
+"     let g:airline_right_sep = '◀'
+"     let g:airline_symbols.linenr = '␊'
+"     let g:airline_symbols.linenr = '␤'
+"     let g:airline_symbols.linenr = '¶'
+"     let g:airline_symbols.branch = '⎇'
+"     let g:airline_symbols.paste = 'ρ'
+"     let g:airline_symbols.paste = 'Þ'
+"     let g:airline_symbols.paste = '∥'
+"     let g:airline_symbols.whitespace = 'Ξ'
+" "
+"     " airline symbols
+"     let g:airline_left_sep = ''
+"     let g:airline_left_alt_sep = ''
+"     let g:airline_right_sep = ''
+"     let g:airline_right_alt_sep = ''
+"     let g:airline_symbols.branch = ''
+"     let g:airline_symbols.readonly = ''
+"     let g:airline_symbols.linenr = '☰'
+" "     let g:airline_symbols.linenr = ''
+" 
+"     " powerline symbols
+"     let g:airline_symbols.maxlinenr = ''
+"     let g:airline_symbols.dirty='⚡'
+" 
+
+" NERDTree
+" --------
+" Show bookmarks on top of file tree
+let NERDTreeShowBookmarks=1
+
+" Vimspector
+" ------------
+if !has('nvim')
+    let g:vimspector_enable_mappings = 'HUMAN'
+    packadd! vimspector
+    nnoremap <Leader>dl :call vimspector#Launch()<CR>
+    nnoremap <Leader>dq :call vimspector#Reset()<CR>
+    nnoremap <Leader>dc :call vimspector#Continue()<CR>
+
+    nnoremap <Leader>db :call vimspector#ToggleBreakpoint()<CR>
+    nnoremap <Leader>dB :call vimspector#ClearBreakpoints()<CR>
+
+    nmap <Leader>dr <Plug>VimspectorRestart
+    nmap <Leader>dso <Plug>VimspectorStepOut
+    nmap <Leader>ds <Plug>VimspectorStepInto
+    nmap <Leader>dn <Plug>VimspectorStepOver
+endif
+
+" Rooter
+" ------------
+let g:rooter_patterns = ['.git']
+let g:rooter_manual_only = 1
+nnoremap <silent> <Leader>R :Rooter<CR>
+
+" Gitgutter
+" ---------
+nmap <Leader>hn <Plug>(GitGukterNextHunk)
+nmap <Leader>hp <Plug>(GitGutterPrevHunk)
+nmap <Leader>hv <Plug>(GitGutterPreviewHunk)
+" Colors in preview window
+highlight diffAdded ctermfg=57
+highlight diffChanged ctermfg=57 ctermbg=58
+highlight diffRemoved ctermfg=166
+let g:gitgutter_preview_win_floating = 1
+" Refresh every 500ms (default=4s, shared with swap file update)
+set updatetime=500
+
+" FZF
+" ---------
+let $FZF_DEFAULT_COMMAND="rg --files --hidden -g '!.git'"
+nnoremap <silent> <Leader>b :Buffers<CR>
+nnoremap <silent> <Leader>f :Files<CR>
+nnoremap <silent> <Leader>/ :BLines<CR>
+nnoremap <silent> <Leader>' :Marks<CR>
+nnoremap <silent> <Leader>g :Commits<CR>
+nnoremap <silent> <Leader>H :Helptags<CR>
+nnoremap <silent> <Leader>hh :History<CR>
+nnoremap <silent> <Leader>h: :History:<CR>
+nnoremap <silent> <Leader>h/ :History/<CR> 
+" Use ripgrep to search in files ...
+nnoremap <silent> <C-f> :Rg<CR>
+" ... but exclude file names from search results
+command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
+
+if has('win32') || has ('win64')
+    let $VIMHOME = $VIM."/vimfiles"
+else
+    let $VIMHOME = $HOME."/.vim"
+endif
+source $VIMHOME/jumplist_fzf.vim
+
+" MarkBar
+" ---------
+set viminfo+=!
+nmap <Leader>m <Plug>ToggleMarkbar
+
+" Taboo
+" ------
+" Preserve tab names upon restoring sessions
+set sessionoptions+=tabpages,globals
+
+" Zoxide
+" ------
+let g:zoxide_prefix = 'j'
+
+" NNN
+" ------
+map <Leader>nnn :NnnExplorer<CR>
+
+" CtrlSF
+" ------
+" prompt
+nmap <Leader>sfp <Plug>CtrlSFPrompt 
+" toggle open/close  
+nmap <Leader>sft :CtrlSFToggle<CR>
+" search current visual selection
+vmap <Leader>sfc <Plug>CtrlSFVwordPath
+" search word under cursor
+nmap <Leader>sfc <Plug>CtrlSFCwordPath
+
+
+" 
+" EasyGrep
+" ---------
+"  This unfortunately will make fzf look inside the files when using <leader-f>
+"  let g:EasyGrepCommand='rg'
+
+" QuickUI
+" ---------
+call quickui#menu#reset()
+
+call quickui#menu#install('&Symbol', [
+			\ [ "&Grep Word\t(In Project)", 'call MenuHelp_GrepCode()', 'Grep keyword in current project' ],
+			\ [ "--", ],
+			\ [ "Find &Definition\t(GNU Global)", 'call MenuHelp_Gscope("g")', 'GNU Global search g'],
+			\ [ "Find &Symbol\t(GNU Global)", 'call MenuHelp_Gscope("s")', 'GNU Gloal search s'],
+			\ [ "Find &Called by\t(GNU Global)", 'call MenuHelp_Gscope("d")', 'GNU Global search d'],
+			\ [ "Find C&alling\t(GNU Global)", 'call MenuHelp_Gscope("c")', 'GNU Global search c'],
+			\ [ "Find &From Ctags\t(GNU Global)", 'call MenuHelp_Gscope("z")', 'GNU Global search c'],
+			\ [ "--", ],
+			\ [ "Goto D&efinition\t(Telescope)", 'Telescope lsp_definitions'],
+			\ [ "Goto &Implementation\t(YCM)", 'YcmCompleter GoToImplementation'],
+			\ [ "Goto &References\t(YCM)", 'YcmCompleter GoToReferences'],
+			\ [ "Goto Callers\t(YCM)", 'YcmCompleter GoToCallers'],
+			\ [ "Get D&oc\t(YCM)", 'YcmCompleter GetDoc'],
+			\ [ "Get &Type\t(YCM)", 'YcmCompleter GetTypeImprecise'],
+			\ ])
+
+let g:context_menu_k = [
+			\ ["&Peek Definition\tAlt+;", 'call quickui#tools#preview_tag("")'],
+			\ ["S&earch in Project\t\\cx", 'exec "silent! GrepCode! " . expand("<cword>")'],
+			\ [ "--", ],
+			\ [ "Find &Definition\t\\cg", 'call MenuHelp_Fscope("g")', 'GNU Global search g'],
+			\ [ "Find &Symbol\t\\cs", 'call MenuHelp_Fscope("s")', 'GNU Gloal search s'],
+			\ [ "Find &Called by\t\\cd", 'call MenuHelp_Fscope("d")', 'GNU Global search d'],
+			\ [ "Find C&alling\t\\cc", 'call MenuHelp_Fscope("c")', 'GNU Global search c'],
+			\ [ "Find &From Ctags\t\\cz", 'call MenuHelp_Fscope("z")', 'GNU Global search c'],
+			\ [ "--", ],
+			\ [ "Goto D&efinition\t(LSP)", 'YcmCompleter GoToDefinitionElseDeclaration'],
+			\ [ "Goto &Implementation\t(YCM)", 'YcmCompleter GoToImplementation'],
+			\ [ "Goto &References\t(YCM)", 'YcmCompleter GoToReferences'],
+			\ [ "Goto Callers\t(YCM)", 'YcmCompleter GoToCallers'],
+			\ [ "Get D&oc\t(YCM)", 'YcmCompleter GetDoc'],
+			\ [ "Get &Type\t(YCM)", 'YcmCompleter GetTypeImprecise'],
+			\ [ "--", ],
+			\ ['Dash &Help', 'call asclib#utils#dash_ft(&ft, expand("<cword>"))'],
+			\ ['Cpp&man', 'exec "Cppman " . expand("<cword>")', '', 'c,cpp'],
+			\ ['P&ython Doc', 'call quickui#tools#python_help("")', 'python'],
+			\ ]
+
+
+nnoremap <silent><space><space> :call quickui#menu#open()<cr>
+
+nnoremap <silent>K :call quickui#tools#clever_context('k', g:context_menu_k, {})<cr>
+
+
+" Nnn
+" use the same nnn session within a vim session
+let g:nnn#session = 'local'
+
+

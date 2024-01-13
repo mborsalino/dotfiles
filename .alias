@@ -1,0 +1,31 @@
+alias mstenv="env | grep -E 'MST_|SPL_|CSTR_|IDEM_|UIDEM_|PY_' | sort"
+
+alias mst='cd /psg/dev/proj/stellar/usr/mborsali/repos/sst'
+alias sst='cd /psg/dev/proj/stellar/usr/mborsali/repos/sst'
+alias gme='cd /mosys/proj/mst/mborsalino/repos/mst/stellar/prod/gme/src'
+alias pygme='cd /mosys/proj/mst/mborsalino/repos/mst/stellar/prod/gme/src/python/pygme'
+alias orbit='cd /mosys/proj/mst/mborsalino/repos/mst/stellar/prod/gme/tools/orbit'
+alias cd_stlr='cd /mosys/proj/mst/mborsalino/repos/mst/stellar/common/tools/stlr'
+
+alias vi='vim -X'
+alias vim='VISUAL=vi nvim -X'
+alias nv='nvim -X'
+alias journal='vim ~/journal.txt'
+alias gjournal='gvim ~/journal.txt'
+
+alias xtermsola='xtermcontrol --file ~/.xtermcontrol.solarized'
+alias xtermdos='xtermcontrol --file ~/.xtermcontrol.dos'
+
+alias view='vim -X -R'
+alias viu='/snap/bin/viu-image-viewer.viu'
+
+alias exa='exa --long --git'
+
+alias em='emacs -nw'
+alias ls='ls --color'
+
+alias sst='cd ~/proj/sst'
+alias sst2='cd ~/proj/sst2'
+alias sst3='cd ~/proj/sst3'
+
+alias showpath="echo \$PATH | tr ':' '\n'"
