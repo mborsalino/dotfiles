@@ -30,11 +30,14 @@ return {
 
     -- do not map the following. while convenient, it makes the current
     -- <leader>f keybinding (for fzf.vim) slower since it waits for a second letter for 2 seconds
---    keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
---    keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
---    keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
---    keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
+   keymap.set("n", "<leader>tf", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
+   keymap.set("n", "<leader>tr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
+   keymap.set("n", "<leader>tj", "<cmd>Telescope jumplist<cr>", { desc = "Fuzzy find jumplist" })
+   keymap.set("n", "<leader>k", "<cmd>Telescope keymaps<cr>", { desc = "Find vim keybinding" })
+   -- see also <leader>th defined in harpoon.lua
 
-      keymap.set("n", "<leader>k", "<cmd>Telescope keymaps<cr>", { desc = "Find vim keybinding" })
+   -- keymap.set("n", "<leader>ts", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
+   -- keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
+
   end,
 }
