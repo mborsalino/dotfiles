@@ -25,9 +25,9 @@ require("lazy").setup(
         checker = {
             enabled = true,
             notify = true,
-        }, 
+        },
         change_detection = {
-            notify = true,
+            notify = false,
         },
         reset_pack_path=false,
         rtp =  {
