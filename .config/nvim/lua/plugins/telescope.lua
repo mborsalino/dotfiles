@@ -34,6 +34,8 @@ return {
    keymap.set("n", "<leader>tr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
    keymap.set("n", "<leader>tj", "<cmd>Telescope jumplist<cr>", { desc = "Fuzzy find jumplist" })
    keymap.set("n", "<leader>k", "<cmd>Telescope keymaps<cr>", { desc = "Find vim keybinding" })
+  keymap.set("n", "<leader>tt", "<cmd>Telescope current_buffer_tags<cr>", { desc = "Fim tags in current buffer" })
+  keymap.set("n", "<leader>tpt", "<cmd>Telescope tags<cr>", { desc = "Fim tags in current project" })
    -- see also <leader>th defined in harpoon.lua
 
    -- keymap.set("n", "<leader>ts", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
