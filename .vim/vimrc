@@ -53,6 +53,7 @@ Plug 'wincent/ferret'
 Plug 'stefandtw/quickfix-reflector.vim'
 
 Plug 'dyng/ctrlsf.vim'
+Plug 'vim-scripts/BufOnly.vim'
 
 "
 " Any valid git URL is allowed
