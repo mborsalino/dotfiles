@@ -98,6 +98,10 @@ bind-key -T copy-mode-vi y send -X copy-selection
 unbind p
 bind p paste-buffer
 
+# choose buffer to be pasted with inline-preview
+bind b choose-buffer -F "#{buffer-size} bytes: #{=60:buffer_sample}"
+
+
 ## Copy-paste from system clipboard ##
 # Prefix Ctrl-C takes what's in the buffer and sends it to system clipboard
 # via xclip
