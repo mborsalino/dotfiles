@@ -12,7 +12,7 @@
       },
       config = function()
           local cmp = require"cmp"
-  
+
           cmp.setup({
             snippet = {
               expand = function(args)
@@ -40,7 +40,7 @@
               { name = 'buffer' },
             })
           })
-  
+
           -- Set configuration for specific filetype.
           cmp.setup.filetype('gitcommit', {
             sources = cmp.config.sources({
@@ -49,7 +49,7 @@
               { name = 'buffer' },
             })
           })
-  
+
           -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
           cmp.setup.cmdline({ '/', '?' }, {
             mapping = cmp.mapping.preset.cmdline(),
@@ -57,7 +57,7 @@
               { name = 'buffer' }
             }
           })
-  
+
           -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
           cmp.setup.cmdline(':', {
             mapping = cmp.mapping.preset.cmdline(),
@@ -67,12 +67,12 @@
               { name = 'cmdline' }
             })
           })
-  
+
           -- Disable LSP semantic syntax highlighting 
           for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
                   vim.api.nvim_set_hl(0, group, {})
           end
-  
+
           -- Toggle LSP Diagonistic on and off (server still running, but do not display errs/warnings)
           local diagnostics_active = true
           vim.keymap.set('n', '<leader>dt', function()
@@ -83,12 +83,12 @@
               vim.diagnostic.hide()
             end
           end)
-  
+
           -- Uncomment this if you're annoied by the inline diagnostics
           -- vim.diagnostic.config({
           --   virtual_text = false, -- Turn off inline diagnostics
           -- })
-  
+
           -- Show all diagnostics on current line in floating window
           vim.api.nvim_set_keymap(
             'n', '<Leader>ds', ':lua vim.diagnostic.open_float()<CR>',

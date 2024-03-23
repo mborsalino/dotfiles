@@ -3,10 +3,9 @@ add_newline = false
 
 # Make prompt a single line instead of two lines
 [line_break]
-# disabled = true
 disabled = false
 
-format = "$all"
+format = "${custom...sbruf_prompt} $all"
 
 [username]
 style_user = "white bold"
@@ -32,8 +31,20 @@ disabled = true
 disabled = true
 
 [git_branch]
-truncation_length = 10
-truncation_symbol = ""
+truncation_length = 10 
+truncation_symbol = "⁖"
 symbol = ""
 style = "bold purple"
 format = "[$symbol$branch]($style)"
+
+[custom]
+when = true
+
+[custom.sbruf_prompt]
+command = "sbruf prompt --env-only 2>&1"
+# the following does not work for unknown reasons. Use test below
+# when = true
+when = "test 1"
+style = "fg:cyan"
+# symbol = "∳"
+

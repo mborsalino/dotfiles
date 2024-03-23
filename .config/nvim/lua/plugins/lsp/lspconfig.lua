@@ -12,6 +12,10 @@ return {
     -- import cmp-nvim-lsp plugin
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
+    -- disable logging to avoid log file to grow indefinitely
+    -- Turn this one on in vim by typing :lua vim.lsp.set_log_level("debug")
+    vim.lsp.set_log_level("off")
+
     local keymap = vim.keymap -- for conciseness
 
     local opts = { noremap = true, silent = true }
@@ -57,6 +61,10 @@ return {
 
       opts.desc = "Restart LSP"
       keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+
+      opts.desc = "Show code actions"
+      keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+
     end
 
     -- used to enable autocompletion (assign to every lsp server config)
@@ -82,30 +90,41 @@ return {
       on_attach = on_attach,
     })
 
+    -- -- configure python server
+    -- -- lspconfig["pylsp"].setup({
+    -- lspconfig["pyright"].setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --
+    -- })
+
     -- configure python server
-    -- lspconfig["pylsp"].setup({
-    lspconfig["pyright"].setup({
+    lspconfig["pylsp"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
-      -- settings = {
-      --     pylsp = {
-      --         plugins = {
-      --             pycodestyle = {
-      --                 ignore = {'E203', -- whitespace before : 
-      --                           'E228', -- space around modulo  
-      --                           'E503', -- line break before binary operator
-      --                           'E501', -- line too long 
-      --                           'E303', -- too many blank lines
-      --                           'W504', -- line break after binary operator
-      --                           'E127', -- continuation line over-indented
-      --                           'E128', -- continuation line under-indented
-      --                          }
-      --             }
-      --         }
-      --     }
-      -- }
+      settings = {
+          pylsp = {
+              plugins = {
+                  pycodestyle = {
+                      ignore = {'E203', -- whitespace before : 
+                                'E228', -- space around modulo  
+                                'E503', -- line break before binary operator
+                                'E501', -- line too long 
+                                'E303', -- too many blank lines
+                                'W504', -- line break after binary operator
+                                'E121', -- continuation line under-indented 
+                                'E126', -- continuation line over-indented 
+                                'E127', -- continuation line over-indented
+                                'E128', -- continuation line under-indented
+                                'E225', -- missing whitespace around operator (not arithmetic operator)
+                               }
+                  }
+              }
+          }
+      }
 
     })
+
 
     -- configure lua server (with special settings)
     lspconfig["lua_ls"].setup({

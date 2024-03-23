@@ -24,8 +24,8 @@
     conflictstyle = diff3
 
 [mergetool "p4merge"]
-    path = /home/mborsalino/bin/p4merge
-    cmd = /home/mborsalino/bin/p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+    # path = /home/mborsalino/bin/p4merge
+    cmd = p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
 #
 #[mergetool "mymeld"]
 #     cmd = meld --diff $BASE $LOCAL --diff $BASE $REMOTE --diff $LOCAL $MERGED $REMOTE
@@ -35,7 +35,7 @@
 	tool = meld
 
 [difftool "p4merge"]
-    path = /home/mborsalino/bin/p4merge
+    # path = /home/mborsalino/bin/p4merge
     
 
 [core]
@@ -63,6 +63,8 @@
     # git ff master dev  --> fast forward master to dev
     ff = "!git fetch . $2:$1"
     sdiff = "!git -c delta.side-by-side=true diff $@"
+    cim = commit --interactive
+
 
 
 [rerere]

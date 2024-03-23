@@ -30,8 +30,9 @@ return {
         "lua_ls",
         "rust_analyzer",
         "clangd",
-        -- "pylsp", -- pyright is an alternative
-        "pyright", -- pyright is an alternative
+        "pylsp", -- pyright is an alternative
+        -- "pyright",
+        -- "pyre"
       },
       -- auto-install configured servers (with lspconfig)
       automatic_installation = true, -- not the same as ensure_installed
