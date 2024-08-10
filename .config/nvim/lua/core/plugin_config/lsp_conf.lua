@@ -52,6 +52,7 @@ lspconfig.pylsp.setup {
                             'W504', -- line break after binary operator
                             'E127', -- continuation line over-indented
                             'E128', -- continuation line under-indented
+                            'E124', -- closing bracket doesn't match visual indentation
                            }
               }
           }

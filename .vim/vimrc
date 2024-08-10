@@ -57,6 +57,8 @@ Plug 'vim-scripts/BufOnly.vim'
 
 Plug 'ryanoasis/vim-devicons'
 
+Plug 'luk400/vim-jukit'
+
 "
 " Any valid git URL is allowed
 "Plug 'https://github.com/junegunn/vim-github-dashboard.git'
@@ -177,7 +179,6 @@ let g:seoul256_background = 235
 let g:seoul256_light_background = 256
 " let g:seoul256_srgb = 1
 colorscheme seoul256
-
 
 "----------------------------------------------------------------------------------------------------------------------"
 " Custom Functions
@@ -353,7 +354,10 @@ cnoreabbrev ntf NERDTreeFocus
 cnoreabbrev ntt NERDTreeToggle
 
 " TagBar shortcuts
+nmap <Leader>tag :TagbarOpen jf<CR>
+" The following has been obsoleted by the previous. Remove once muscle memory adapted.
 cnoreabbrev tbarf TagbarOpen j
+
 cnoreabbrev tbart TagbarToggle
 
 " Zoom pane shortcut
@@ -367,12 +371,11 @@ map <A-Down> :vertical resize -5<CR>
 " map <F7> :vertical resize -5<CR>
 "
 
-" Switch focus to Tree viewer
-"
-" Assumes the tree viewer (whether Nnn, NerdTree or others) is on the leftmost
-" pane
-nmap <Leader>tf 1<C-w><C-w>
-
+" Switch focus to the leftmost window.
+" This is useful to switch focuse to either Nnn, NerdTree or other treeviewers
+" when they are opened as the leftmost panes. To switch focus to TagBar see
+" the dedicated abbrev
+nmap <Leader>l 1<C-w><C-w>
 
 
 "----------------------------------------------------------------------------------------------------------------------"
@@ -386,13 +389,20 @@ au BufRead,BufNewFile *.stil    setfiletype stil
 au BufRead,BufNewFile *.tcl    setfiletype tcl
 au BufRead,BufNewFile *.pasm   setfiletype pasm
 au BufRead,BufNewFile *.pasm   set syntax=pasm
-
+au BufRead,BufNewFile *.acl    setfiletype acl
+au BufRead,BufNewFile *.acl   set syntax=acl
+au BufRead,BufNewFile *.cam    setfiletype cam
+au BufRead,BufNewFile *.cam   set syntax=cam
+au BufRead,BufNewFile *.uws    setfiletype uws
+au BufRead,BufNewFile *.uws   set syntax=uws
+"
 " au BufRead,BufNewFile *.c      set tabstop=2
 " au BufRead,BufNewFile *.c      set shiftwidth=2
 " au BufRead,BufNewFile *.cpp      set tabstop=4
 " au BufRead,BufNewFile *.cpp      set shiftwidth=4
 "
 au BufRead,BufNewFile *.lua      setlocal shiftwidth=2 tabstop=2 softtabstop=2 expandtab
+au BufRead,BufNewFile *.uws      setlocal shiftwidth=2 tabstop=2 softtabstop=2 expandtab
 au BufRead,BufNewFile *.h        setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab
 au BufRead,BufNewFile *.c        setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab
 au BufRead,BufNewFile *.cpp      setlocal shiftwidth=4 tabstop=4 softtabstop=4 expandtab

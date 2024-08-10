@@ -28,7 +28,8 @@ return {
       -- list of servers for mason to install
       ensure_installed = {
         "lua_ls",
-        "rust_analyzer",
+        -- rust installed separately to use system rust-analyzer
+        -- "rust_analyzer",
         "clangd",
         "pylsp", -- pyright is an alternative
         -- "pyright",

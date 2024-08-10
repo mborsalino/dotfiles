@@ -1,6 +1,6 @@
 [auth]
 user = "mborsali"
-password = "wbonatt1.6"
+password = "wbonatt1.9"
 
 [server]
 url = "https://jira.devtools.intel.com"

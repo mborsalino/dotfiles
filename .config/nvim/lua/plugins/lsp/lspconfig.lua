@@ -78,10 +78,19 @@ return {
       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
     end
 
-    -- configure html server
+    -- configure rust server
     lspconfig["rust_analyzer"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
+      cmd = {"/home/mborsali/.cargo/bin/rust-analyzer"},
+      settings = {
+          ["rust-analyzer"] = {
+              cargo = {
+                  targetDir = true
+              },
+              checkOnSave = true,
+          }
+      }
     })
 
     -- configure clangd server with plugin
@@ -117,6 +126,10 @@ return {
                                 'E127', -- continuation line over-indented
                                 'E128', -- continuation line under-indented
                                 'E225', -- missing whitespace around operator (not arithmetic operator)
+                                'E116', -- unexpected indentation (comment)
+                                'E305', -- Expected 2 blank lines after class or function definition
+                                'E302', -- Expected 2 blank lines
+                                'E301', -- Expected 1 blank lines
                                }
                   }
               }
