@@ -60,6 +60,7 @@
     accept-ours = "!f() { git checkout --ours -- \"${@:-.}\"; git add -u \"${@:-.}\"; }; f"
     accept-theirs = "!f() { git checkout --theirs -- \"${@:-.}\"; git add -u \"${@:-.}\"; }; f"
     parent = "!git show-branch | grep '*' | grep -v \"$(git rev-parse --abbrev-ref HEAD)\" | head -n1 | sed 's/.*\\[\\(.*\\)\\].*/\\1/' | sed 's/[\\^~].*//' #"
+    is-ancestor = "!f() { if git merge-base --is-ancestor $1 HEAD; then echo HEAD contains commit \"$1\"; else echo HEAD does NOT contain commit \"$1\"; fi }; f $1"
     # git ff master dev  --> fast forward master to dev
     ff = "!git fetch . $2:$1"
     sdiff = "!git -c delta.side-by-side=true diff $@"
