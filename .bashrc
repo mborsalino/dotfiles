@@ -6,6 +6,9 @@ fi
 # Avoid autocompletion escape the $ sign (so allow expansion of env vars)
 shopt -s direxpand
 
+# stty only for interactive shells (so scp does not complain for invalid ioctl for device)
+[[ $- == *i* ]] && stty sane
+
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=
 
@@ -164,9 +167,6 @@ function hl() {
 	sed -u s"/$2/$fg_c\0$c_rs/g"
 }
 
-# set bash prompt to show current branch
-export PS1="\u@\h \[\e[32m\]\W \[\e[91m\]\$(parse_git_branch)\[\e[00m\]$ "
-
 # Use vi keybindings
 set -o vi
    
@@ -175,6 +175,9 @@ source ~/.alias
 # Set default editor
 export EDITOR=nvim
 export VISUAL=nvim
+
+# [[ -f ~/local/fzf-tab-completion/bash/fzf-bash-completion.sh ]] && source ~/local/fzf-tab-completion/bash/fzf-bash-completion.sh && bind -x '"\t": fzf_bash_completion'
+
 
 # autojump
 [[ -s $HOME/local/autojump/etc/profile.d/autojump.sh ]] && source $HOME/local/autojump/etc/profile.d/autojump.sh
@@ -197,30 +200,32 @@ export sbs='-c delta.side-by-side=true'
 # Source stuff needed by rust compiler
 . "$HOME/.cargo/env"
 
-# source starship init script
-eval "$(starship init bash)"
-
-export MOSYS_OVPN_PATH=$HOME/vpn
-
 [ -f ~/.wsl.bash ] && source ~/.wsl.bash
+
+# source starship init script (only on interactive shells)
+[[ $_ == *i* ]] && eval "$(starship init bash)"
 
 eval "$(zoxide init --cmd=j bash)"
 
-stty sane
-
 source ~/.hosts
 
-# source /sicoe/cfg/stlr.env.bash
-# source /sicoe/cfg/stlr.user.bash
 source /sicoe3/cfg/sbruf.env.bash
-
-# -------- START SECTION: Added by stlr - DO NOT EDIT ------ #
-# source /home/mborsali/.config/stlr/stlr.user.bash
-# -------- END SECTION: Added by stlr - DO NOT EDIT ------ #
 
 export JNR_CFG_FILE=$HOME/.config/jiner/jiner.toml
 
-# source /sicoe3/cfg/sbf.env.bash
-
+export MODULES_REDIRECT_OUTPUT=1
 module load neovim
-# module load sstdev/4.0
+module unload sstdev/4.0 > /dev/null
+module load sstdev/4.0 > /dev/null
+
+# autocomplete with a single tab
+bind 'set show-all-if-ambiguous on'
+# autocomplete ignoring case
+bind 'set completion-ignore-case on'
+
+# This section must be AFTER module load sstdev b/c SST_REPO/scripts must be in PATH
+# Setup sbruf autocompletion
+complete -C compl_sbruf.py sbruf
+
+
+
