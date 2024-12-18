@@ -39,7 +39,7 @@ Plug 'chrisbra/csv.vim'
 Plug 'dkprice/vim-easygrep'
 Plug 'rust-lang/rust.vim'
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'Yilin-Yang/vim-markbar'
+" Plug 'Yilin-Yang/vim-markbar'
 Plug 'skywind3000/vim-quickui' 
 if !has('nvim') && has('lua')
     Plug 'jeaye/color_coded'
@@ -57,7 +57,6 @@ Plug 'vim-scripts/BufOnly.vim'
 
 Plug 'ryanoasis/vim-devicons'
 
-Plug 'luk400/vim-jukit'
 
 "
 " Any valid git URL is allowed
