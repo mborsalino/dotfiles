@@ -21,6 +21,7 @@
 
 [merge]
     # tool = meld
+    #conflictstyle = zdiff3
     conflictstyle = diff3
 
 [mergetool "p4merge"]
@@ -40,11 +41,12 @@
 
 [core]
 	editor = nvim
+    pager = delta
 	excludefiles = /home/mborsali/.gitignore_global
 	excludesfile = /home/mborsali/.gitignore_global
 
 [alias]
-	undo-commit = reset --soft HEAD^
+    undo-commit = reset --soft HEAD^
 	mylog = log --decorate --oneline --graph --pretty=format:\"%h %Cred%d%Creset %Cblue%aN%Creset -- %s\"
     ml = log --decorate --oneline --graph --exclude "johan*" --decorate-refs-exclude='*johan*' --pretty=format:\"%h %Cred%d%Creset %Cblue%aN%Creset  -- %s\"
     mla = log --decorate --oneline --graph --exclude "johan*" --decorate-refs-exclude='*johan*' --branches --pretty=format:\"%h %Cred%d%Creset %Cblue%aN%Creset  -- %s\"
@@ -63,10 +65,10 @@
     is-ancestor = "!f() { if git merge-base --is-ancestor $1 HEAD; then echo HEAD contains commit \"$1\"; else echo HEAD does NOT contain commit \"$1\"; fi }; f $1"
     # git ff master dev  --> fast forward master to dev
     ff = "!git fetch . $2:$1"
-    sdiff = "!git -c delta.side-by-side=true diff $@"
+    sdiff = "!f() { git -c delta.side-by-side=true diff \"$@\"; }; f"
     cim = commit --interactive
-
-
+    shove = push --force-with-lease
+    state = status --short --branch --untracked-files
 
 [rerere]
     enabled = 1
@@ -81,6 +83,7 @@
 
 # Configure "delta" as the main git diff tool
 [pager]
+    blame = delta
     diff = delta
     log = delta
     reflog = delta
@@ -95,4 +98,7 @@
 
 # Set my proferred colorscheme (for dark backgrounds)
 [delta]
-     features = calochortus-lyallii 
+    features = calochortus-lyallii 
+	navigate = true  # use n and N to move between diff sections
+	max-line-length = 0
+    # side-by-side = true
