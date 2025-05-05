@@ -31,8 +31,8 @@ return {
         -- rust installed separately to use system rust-analyzer
         -- "rust_analyzer",
         "clangd",
-        "pylsp", -- pyright is an alternative
-        -- "pyright",
+        -- "pylsp", -- pyright is an alternative
+        "pyright",
         -- "pyre"
       },
       -- auto-install configured servers (with lspconfig)

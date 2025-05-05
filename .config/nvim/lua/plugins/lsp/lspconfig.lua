@@ -57,7 +57,7 @@ return {
       keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- jump to next diagnostic in buffer
 
       opts.desc = "Show documentation for what is under cursor"
-      keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
+      keymap.set("n", "<leader>k", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
 
       opts.desc = "Restart LSP"
       keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
@@ -78,6 +78,10 @@ return {
       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
     end
 
+    -- ----------------------------
+    -- Setup individual LSP servers
+    -- ----------------------------
+    --
     -- configure rust server
     lspconfig["rust_analyzer"].setup({
       capabilities = capabilities,
@@ -99,44 +103,47 @@ return {
       on_attach = on_attach,
     })
 
-    -- -- configure python server
-    -- -- lspconfig["pylsp"].setup({
-    -- lspconfig["pyright"].setup({
-    --   capabilities = capabilities,
-    --   on_attach = on_attach,
-    --
-    -- })
-
     -- configure python server
-    lspconfig["pylsp"].setup({
+    lspconfig["pyright"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
       settings = {
-          pylsp = {
-              plugins = {
-                  pycodestyle = {
-                      ignore = {'E203', -- whitespace before : 
-                                'E228', -- space around modulo  
-                                'E503', -- line break before binary operator
-                                'E501', -- line too long 
-                                'E303', -- too many blank lines
-                                'W504', -- line break after binary operator
-                                'E121', -- continuation line under-indented 
-                                'E126', -- continuation line over-indented 
-                                'E127', -- continuation line over-indented
-                                'E128', -- continuation line under-indented
-                                'E225', -- missing whitespace around operator (not arithmetic operator)
-                                'E116', -- unexpected indentation (comment)
-                                'E305', -- Expected 2 blank lines after class or function definition
-                                'E302', -- Expected 2 blank lines
-                                'E301', -- Expected 1 blank lines
-                               }
-                  }
-              }
-          }
-      }
-
+        python = {
+            analysis = { diagnosticMode = "off", typeCheckingMode = "off" },
+        },
+      },
     })
+
+    -- -- configure python server
+    -- lspconfig["pylsp"].setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --   settings = {
+    --       pylsp = {
+    --           plugins = {
+    --               pycodestyle = {
+    --                   ignore = {'E203', -- whitespace before : 
+    --                             'E228', -- space around modulo  
+    --                             'E503', -- line break before binary operator
+    --                             'E501', -- line too long 
+    --                             'E303', -- too many blank lines
+    --                             'W504', -- line break after binary operator
+    --                             'E121', -- continuation line under-indented 
+    --                             'E124', -- closing bracket doesn't match visual indentation
+    --                             'E126', -- continuation line over-indented 
+    --                             'E127', -- continuation line over-indented
+    --                             'E128', -- continuation line under-indented
+    --                             'E225', -- missing whitespace around operator (not arithmetic operator)
+    --                             'E116', -- unexpected indentation (comment)
+    --                             'E305', -- Expected 2 blank lines after class or function definition
+    --                             'E302', -- Expected 2 blank lines
+    --                             'E301', -- Expected 1 blank lines
+    --                            }
+    --               }
+    --           }
+    --       }
+    --   }
+    -- })
 
 
     -- configure lua server (with special settings)

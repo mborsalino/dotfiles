@@ -1,64 +1,8 @@
 -- Use mason as frontend "LSP server manager"
 require("mason").setup()
 require("mason-lspconfig").setup({
-    ensure_installed = {"lua_ls", "rust_analyzer", "clangd", "pylsp"}
+    ensure_installed = {"lua_ls", "rust_analyzer", "clangd", "pyright"}
 })
-
--- Use lsp-zero to setup keymaps for code navigation
--- local lsp = require('lsp-zero').preset({
---     manage_nvim_cmp = {
---         set_sources = 'recommended'
---     }
--- })
--- lsp.on_attach(function(client, bufnr)
---     lsp.default_keymaps({buffer = bufnr})
--- end)
-
--- Setup individual LSP servers
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-local lspconfig = require('lspconfig')
-
-lspconfig.lua_ls.setup {
-  capabilities = capabilities,
-  settings = {
-    Lua = {
-      diagnostics = {
-        -- Get the language server to recognize the 'vim' global
-        globals = {'vim'},
-      }
-    }
-  }
-}
-
-lspconfig.clangd.setup {
-  capabilities = capabilities
-}
-
-lspconfig.rust_analyzer.setup {
-  capabilities = capabilities
-}
-
-lspconfig.pylsp.setup {
-  capabilities = capabilities,
-  settings = {
-      pylsp = {
-          plugins = {
-              pycodestyle = {
-                  ignore = {'E203', -- whitespace before : 
-                            'E228', -- space around modulo  
-                            'E503', -- line break before binary operator
-                            'E501', -- line too long 
-                            'E303', -- too many blank lines
-                            'W504', -- line break after binary operator
-                            'E127', -- continuation line over-indented
-                            'E128', -- continuation line under-indented
-                            'E124', -- closing bracket doesn't match visual indentation
-                           }
-              }
-          }
-      }
-  }
-}
 
 -- Setup autocompletion
 local cmp = require'cmp'
