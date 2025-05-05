@@ -136,14 +136,6 @@ export -f export_var
 
 
 #
-#   -------- parse_git_branch ---------- #
-#
-# Used to set bash prompt
-function parse_git_branch() {
-    git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
-}     
-
-#
 #   -------- hl (highlight) ---------- #
 #
 # print input to hl function to stdout but highlight pattern in color.
@@ -207,8 +199,6 @@ export sbs='-c delta.side-by-side=true'
 
 eval "$(zoxide init --cmd=j bash)"
 
-source ~/.hosts
-
 source /sicoe3/cfg/sbruf.env.bash
 
 export JNR_CFG_FILE=$HOME/.config/jiner/jiner.toml
@@ -228,4 +218,6 @@ bind 'set completion-ignore-case on'
 complete -C compl_sbruf.py sbruf
 
 
-
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
