@@ -24,7 +24,6 @@ if !has('nvim')
 endif
 Plug 'tpope/vim-fugitive'
 Plug 'preservim/nerdtree'
-Plug 'jistr/vim-nerdtree-tabs'
 " if !has('nvim')
     " Plug 'mcchrish/nnn.vim'
 " endif
@@ -46,7 +45,6 @@ if !has('nvim') && has('lua')
 endif
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-obsession'
-Plug 'gcmt/taboo.vim'
 Plug 'nanotee/zoxide.vim'
 
 Plug 'wincent/ferret'
