@@ -14,7 +14,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Require and configure lazy
 require("lazy").setup(
-    { 
+    {
         {import = "plugins" },
         {import = "plugins.nav" },
         {import = "plugins.appearance" },
@@ -29,7 +29,7 @@ require("lazy").setup(
         change_detection = {
             notify = false,
         },
-        reset_pack_path=false,
+        reset_packpath=false,
         rtp =  {
             reset = false  -- do not reset packpath sincce we set it in vimrc
         }
