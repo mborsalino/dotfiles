@@ -40,6 +40,11 @@ return {
    keymap.set("n", "<leader>tpt", "<cmd>Telescope tags<cr>", { desc = "Find tags in current project" })
    keymap.set("n", "<leader>tls", "<cmd>Telescope lsp_document_symbols<cr>", { desc = "Find LSP symbols in current buffer" })
    keymap.set("n", "<leader>tas", "<cmd>Telescope aerial<cr>", { desc = "Find aerial symbols in current buffer" })
+  local wk = require("which-key")
+  wk.add({
+    {"<leader>tas", "<cmd>Telescope aerial<cr>", { desc = "Find aerial symbols in current buffer" }}
+  })
+   -- keymap.set("n", "<leader>tas", "<cmd>Telescope aerial<cr>", { desc = "Find aerial symbols in current buffer" })
    -- see also <leader>th defined in harpoon.lua
    -- see also <leader>ttb defined in telescope_tabs.lua
 

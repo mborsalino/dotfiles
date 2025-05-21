@@ -550,11 +550,6 @@ source $VIMHOME/jumplist_fzf.vim
 set viminfo+=!
 nmap <Leader>m <Plug>ToggleMarkbar
 
-" Taboo
-" ------
-" Preserve tab names upon restoring sessions
-set sessionoptions+=tabpages,globals
-
 " Zoxide
 " ------
 let g:zoxide_prefix = 'j'
