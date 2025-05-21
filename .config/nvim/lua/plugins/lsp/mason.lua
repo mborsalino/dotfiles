@@ -37,6 +37,7 @@ return {
         -- "pylsp", -- pyright is an alternative
         "pyright",
         -- "pyre"
+        "ruff",
       },
       -- auto-install configured servers (with lspconfig)
       automatic_installation = true, -- not the same as ensure_installed
@@ -47,6 +48,8 @@ return {
         "clang-format",
         "prettier", -- prettier formatter
         "stylua", -- lua formatter
+        "ruff",
+        "jedi-language-server",
       },
     })
   end,

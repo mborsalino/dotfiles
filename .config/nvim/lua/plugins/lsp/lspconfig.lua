@@ -23,25 +23,25 @@ return {
       opts.buffer = bufnr
 
       -- set keybinds
-      opts.desc = "Show LSP references"
+      opts.desc = "LSP: show references"
       keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts) -- show definition, references
 
-      opts.desc = "Go to declaration"
+      opts.desc = "LSP: go to declaration"
       keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- go to declaration
 
-      opts.desc = "Show LSP definitions"
+      opts.desc = "LSP: show definitions"
       keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- show lsp definitions
 
-      opts.desc = "Show LSP implementations"
+      opts.desc = "LSP: show implementations"
       keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts) -- show lsp implementations
 
-      opts.desc = "Show LSP type definitions"
+      opts.desc = "LSP: type definitions"
       keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts) -- show lsp type definitions
 
-      opts.desc = "See available code actions"
+      opts.desc = "LSP: See available code actions"
       keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
 
-      opts.desc = "Smart rename"
+      opts.desc = "LSP: Smart rename"
       keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- smart rename
 
       opts.desc = "Show buffer diagnostics"
@@ -64,6 +64,7 @@ return {
 
       opts.desc = "Show code actions"
       keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+
 
     end
 
@@ -103,16 +104,38 @@ return {
       on_attach = on_attach,
     })
 
-    -- configure python server
-    lspconfig["pyright"].setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = {
-        python = {
-            analysis = { diagnosticMode = "off", typeCheckingMode = "off" },
-        },
-      },
-    })
+    -- -- configure python server
+    -- lspconfig["pyright"].setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --   settings = {
+    --     pyright = {
+    --         -- Using Ruff's import organizer
+    --         disableOrganizeImports = true,
+    --     },
+    --     python = {
+    --         analysis = {
+    --             -- Ignore all files for analysis to exclusively user Ruff for linting
+    --             ignore = { '*' },
+    --             typeCheckingMode = "off",
+    --         }
+    --     },
+    --   },
+    -- })
+
+
+    lspconfig["ruff"].setup {
+      init_options = {
+        settings = {
+          lint = {
+              -- ignore = {"E4", "E7"}
+            ignore = {'E203', -- whitespace before : 
+                      'E228', -- space around modulo  
+               }
+          }
+        }
+      }
+    }
 
     -- -- configure python server
     -- lspconfig["pylsp"].setup({
@@ -122,23 +145,6 @@ return {
     --       pylsp = {
     --           plugins = {
     --               pycodestyle = {
-    --                   ignore = {'E203', -- whitespace before : 
-    --                             'E228', -- space around modulo  
-    --                             'E503', -- line break before binary operator
-    --                             'E501', -- line too long 
-    --                             'E303', -- too many blank lines
-    --                             'W504', -- line break after binary operator
-    --                             'E121', -- continuation line under-indented 
-    --                             'E124', -- closing bracket doesn't match visual indentation
-    --                             'E126', -- continuation line over-indented 
-    --                             'E127', -- continuation line over-indented
-    --                             'E128', -- continuation line under-indented
-    --                             'E225', -- missing whitespace around operator (not arithmetic operator)
-    --                             'E116', -- unexpected indentation (comment)
-    --                             'E305', -- Expected 2 blank lines after class or function definition
-    --                             'E302', -- Expected 2 blank lines
-    --                             'E301', -- Expected 1 blank lines
-    --                            }
     --               }
     --           }
     --       }
@@ -166,5 +172,24 @@ return {
         },
       },
     })
+
+    vim.lsp.enable("jedi-language-server")
+    vim.lsp.config("jedi-language-server", {
+      cmd = { "jedi-language-server" },
+      filetypes = { "python" },
+      root_markers = {
+        "pyproject.toml",
+        "setup.py",
+        "setup.cfg",
+        "requirements.txt",
+        "Pipfile",
+        ".git",
+      }
+    })
+
+
+    -- Show diagnostics in virtual lines
+    vim.diagnostic.config({virtual_text = true, virtual_lines = false})
+
   end,
 }
