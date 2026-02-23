@@ -37,9 +37,6 @@ symbol = ""
 style = "bold purple"
 format = "[$symbol$branch]($style)"
 
-[custom]
-when = true
-
 [custom.sbruf_prompt]
 command = "sbruf prompt --env-only 2>&1"
 # the following does not work for unknown reasons. Use test below

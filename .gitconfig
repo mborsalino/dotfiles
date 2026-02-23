@@ -1,5 +1,5 @@
 [user]
-	email = mattia.borsalino@intel.com
+	email = mattia.borsalino@gmail.com
 	name = Mattia Borsalino
 
 [filter "lfs"]
@@ -8,16 +8,16 @@
 	required = true
 	smudge = git-lfs smudge -- %f
 
-[http "https://github.com"]
-	proxy = http://proxy-dmz.intel.com:912
-[http "https://lfs.github.com"]
-	proxy = http://proxy-dmz.intel.com:912
-[http "https://github-cloud.s3.amazonaws.com"]
-	proxy = http://proxy-dmz.intel.com:912
-[http "https://github-cloud.githubusercontent.com"]
-	proxy = http://proxy-dmz.intel.com:912
-[credential "https://github.com"]
-	helper = 
+# [http "https://github.com"]
+# 	proxy = http://proxy-dmz.intel.com:912
+# [http "https://lfs.github.com"]
+# 	proxy = http://proxy-dmz.intel.com:912
+# [http "https://github-cloud.s3.amazonaws.com"]
+# 	proxy = http://proxy-dmz.intel.com:912
+# [http "https://github-cloud.githubusercontent.com"]
+# 	proxy = http://proxy-dmz.intel.com:912
+# [credential "https://github.com"]
+# 	helper = 
 
 [merge]
     # tool = meld

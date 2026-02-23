@@ -23,7 +23,7 @@ if !has('nvim')
     Plug 'nvim-lualine/lualine.nvim'
 endif
 Plug 'tpope/vim-fugitive'
-Plug 'preservim/nerdtree'
+" Plug 'preservim/nerdtree'
 " if !has('nvim')
     " Plug 'mcchrish/nnn.vim'
 " endif
@@ -536,7 +536,7 @@ nnoremap <silent> <Leader>h/ :History/<CR>
 " Use ripgrep to search in files ...
 nnoremap <silent> <C-f> :Rg<CR>
 " ... but exclude file names from search results
-command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case --ignore-files=tags ".shellescape(<q-args>), 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
+command! -bang -nargs=* Rg call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case --ignore-file=tags ".shellescape(<q-args>), 1, {'options': '--delimiter : --nth 4..'}, <bang>0)
 
 if has('win32') || has ('win64')
     let $VIMHOME = $VIM."/vimfiles"
