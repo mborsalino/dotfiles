@@ -74,7 +74,7 @@ mmod load delta
 export sbs='-c delta.side-by-side=true'
 
 # Source stuff needed by rust compiler
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # WSL
 # [ -f ~/.wsl.bash ] && source ~/.wsl.bash
