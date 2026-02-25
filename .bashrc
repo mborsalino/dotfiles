@@ -14,7 +14,7 @@ source ~/.alias
 source ~/.bash_functions
 
 # The root of all custom-installed stuff
-if [[ -z MDEV ]]; then
+if [[ -z $MDEV ]]; then
     export ENV_ROOT=/env
     os=ubu24
 else
@@ -53,7 +53,7 @@ mmod load fzf &> /dev/null
 
 # nnn
 mmod load nnn/4.5 &> /dev/null
-[ -f $HOME/nnn.bash ] && source $HOME/nnn.bash
+[ -f $HOME/.nnn.bash ] && source $HOME/.nnn.bash
 [ -f $OPT_ROOT/nnn/4.5/misc/auto-completion/bash/nnn-completion.bash ] && source $OPT_ROOT/nnn/4.5/misc/auto-completion/bash/nnn-completion.bash 
 
 mmod load bat btm dust exa fd hyperfine mdbook procs ripgrep sd tealdeer
