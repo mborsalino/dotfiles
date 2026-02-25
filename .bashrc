@@ -1,3 +1,10 @@
+MDEV=
+[ -f $HOME/.bashrc.cb ] && source $HOME/.bashrc.cb
+
+# mmod alias redefined in .bashrc.cb if within mattiab-dev machine
+alias mmod="module "
+[ -f $HOME/.bashrc.mdev ] && source $HOME/.bashrc.mdev
+
 # Source global definitions
 if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
@@ -7,8 +14,14 @@ source ~/.alias
 source ~/.bash_functions
 
 # The root of all custom-installed stuff
-export ENV_ROOT=/env
-OPT_ROOT=$ENV_ROOT/opt/ubu24
+if [[ -z MDEV ]]; then
+    export ENV_ROOT=/env
+    os=ubu24
+else
+    export ENV_ROOT=$HOME/ws/env
+    os=cos7
+fi
+OPT_ROOT=$ENV_ROOT/opt/$os
 source $ENV_ROOT/cfg/sbruf.env.bash
 
 # Avoid autocompletion escape the $ sign (so allow expansion of env vars)
@@ -34,37 +47,37 @@ export VISUAL=nvim
 # [[ -s $HOME/local/autojump/etc/profile.d/autojump.sh ]] && source $HOME/local/autojump/etc/profile.d/autojump.sh
 
 # fuzzy finder
-module load fzf &> /dev/null
+mmod load fzf &> /dev/null
 [ -f $OPT_ROOT/fzf/shell/completion.bash ] && source $OPT_ROOT/fzf/shell/completion.bash
 [ -f $OPT_ROOT/fzf/shell/key-bindings.bash ] && source $OPT_ROOT/fzf/shell/key-bindings.bash
 
 # nnn
-module load nnn/4.5 &> /dev/null
+mmod load nnn/4.5 &> /dev/null
 [ -f $HOME/nnn.bash ] && source $HOME/nnn.bash
 [ -f $OPT_ROOT/nnn/4.5/misc/auto-completion/bash/nnn-completion.bash ] && source $OPT_ROOT/nnn/4.5/misc/auto-completion/bash/nnn-completion.bash 
 
-module load bat btm dust exa fd hyperfine mdbook procs ripgrep sd tealdeer
+mmod load bat btm dust exa fd hyperfine mdbook procs ripgrep sd tealdeer
 
 
-module load starship &> /dev/null
+mmod load starship &> /dev/null
 # eval starship init script (only on interactive shells)
 [[ $_ == *i* ]] && eval "$(starship init bash)"
 
-module load viu
-module load ytop
-module load python
-module load rust
-module load neovim
+mmod load viu
+mmod load ytop
+mmod load python
+mmod load rust
+mmod load neovim
 
 # add env var used to run git -c delta.side-by-side=true delta with less typing
-module load delta
+mmod load delta
 export sbs='-c delta.side-by-side=true'
 
 # Source stuff needed by rust compiler
 . "$HOME/.cargo/env"
 
 # WSL
-[ -f ~/.wsl.bash ] && source ~/.wsl.bash
+# [ -f ~/.wsl.bash ] && source ~/.wsl.bash
 
 # make sure that the output of modulefiles goes to stdout (instead of stderr) 
 # this is needed by sbruf
@@ -100,7 +113,6 @@ export JNR_CFG_FILE=$HOME/.config/jiner/jiner.toml
 [ -d /mnt/c/Users/matti/STM32CubeIDE/workspace_2.0.0 ] && export WIN_STM=/mnt/c/Users/matti/STM32CubeIDE/workspace_2.0.0
 
 # zoxide should be init towards the end to avoid issues
-module load zoxide &> /dev/null
+mmod load zoxide &> /dev/null
 # eval zoxide init script (only on interactive shells)
 [[ $_ == *i* ]] && eval "$(zoxide init --cmd=j bash)"
-
