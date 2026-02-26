@@ -1,9 +1,10 @@
 MDEV=
 [ -f $HOME/.bashrc.cb ] && source $HOME/.bashrc.cb
 
-# mmod alias redefined in .bashrc.cb if within mattiab-dev machine
+# mmod alias redefined in .bashrc.cb if within mattiab-dev machine or mattiab-asic machine
 alias mmod="module "
 [ -f $HOME/.bashrc.mdev ] && source $HOME/.bashrc.mdev
+[ -f $HOME/.bashrc.asic ] && source $HOME/.bashrc.asic
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
