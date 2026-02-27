@@ -1,3 +1,4 @@
 export MONOLITH_DIR=$HOME/ws/repos/monolith
+alias mono="cd $MONOLITH_DIR"
 
 export NNN_BMS="m:$MONOLITH_DIR;w:$MONOLITH_DIR/dv/watchtower/python"
