@@ -1,0 +1,3 @@
+export MONOLITH_DIR=$HOME/ws/repos/monolith
+
+export NNN_BMS="m:$MONOLITH_DIR;w:$MONOLITH_DIR/dv/watchtower/python"
