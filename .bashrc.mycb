@@ -1,4 +1,9 @@
-export MONOLITH_DIR=$HOME/ws/repos/monolith
-alias mono="cd $MONOLITH_DIR"
+if [[ -d $HOME/ws ]]; then
 
-export NNN_BMS="m:$MONOLITH_DIR;w:$MONOLITH_DIR/dv/watchtower/python"
+    export MONOLITH_DIR=$HOME/ws/repos/monolith
+
+    alias mono="cd $MONOLITH_DIR"
+    alias play="cd $HOME/ws/playground" 
+
+    export NNN_BMS="m:$MONOLITH_DIR;w:$MONOLITH_DIR/dv/watchtower/python"
+fi
