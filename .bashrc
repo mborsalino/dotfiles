@@ -5,6 +5,7 @@ MDEV=
 alias mmod="module "
 [ -f $HOME/.bashrc.mdev ] && source $HOME/.bashrc.mdev
 [ -f $HOME/.bashrc.asic ] && source $HOME/.bashrc.asic
+[ -f $HOME/.bashrc.mycb ] && source $HOME/.bashrc.mycb
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
