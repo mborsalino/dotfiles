@@ -4,6 +4,13 @@ if [[ -d $HOME/ws ]]; then
 
     alias mono="cd $MONOLITH_DIR"
     alias play="cd $HOME/ws/playground" 
+    alias mat="cd $HOME/ws/repos/matcb"
 
     export NNN_BMS="m:$MONOLITH_DIR;w:$MONOLITH_DIR/dv/watchtower/python"
+
+    if [[ -d $HOME/ws/repos/matcb/bin ]]; then
+        if ! [[ $PATH =~ 'matcb' ]]; then
+            PATH="$HOME/ws/repos/matcb/bin:$PATH"
+        fi
+    fi
 fi
