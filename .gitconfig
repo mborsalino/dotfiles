@@ -42,8 +42,8 @@
 [core]
 	editor = nvim
     pager = delta
-	excludefiles = /home/mborsali/.gitignore_global
-	excludesfile = /home/mborsali/.gitignore_global
+	excludefiles = ~/.gitignore_global
+	excludesfile = ~/.gitignore_global
 
 [alias]
     undo-commit = reset --soft HEAD^
@@ -94,7 +94,8 @@
 
 # Include a list of predefined delta style configurations ("color schemes")
 [include]
-    path = /home/mborsali/local/delta/themes.gitconfig
+    # path = ~/local/delta/themes.gitconfig
+    path = ~/.config/delta/themes.gitconfig
 
 # Set my proferred colorscheme (for dark backgrounds)
 [delta]
@@ -102,3 +103,17 @@
 	navigate = true  # use n and N to move between diff sections
 	max-line-length = 0
     # side-by-side = true
+
+# Cerebras monolith, include CB standard and my personal CB stuff (email)
+[includeIf "gitdir:**/monolith"]
+	path = ~/.gitconfig.cb
+[includeIf "gitdir:**/monolith"]
+	path = ~/.gitconfig.mycb
+
+# My utils for Cerbras env, only my personal CB stuff (email)
+[includeIf "gitdir:**/matcb"]
+	path = ~/.gitconfig.mycb
+
+# My learning repo for Cerbras, only my personal CB stuff (email)
+[includeIf "gitdir:**/learncb"]
+	path = ~/.gitconfig.mycb
