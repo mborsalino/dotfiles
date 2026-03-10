@@ -1,8 +1,10 @@
 if [[ -d $HOME/ws ]]; then
 
     export MONOLITH_DIR=$HOME/ws/repos/monolith
+    export WAFER_DATA_DIR=$HOME/ws/repos/wafer_bringup_repos
 
     alias mono="cd $MONOLITH_DIR"
+    alias wdata="cd $WAFER_DATA_DIR"
     alias play="cd $HOME/ws/playground" 
     alias mat="cd $HOME/ws/repos/matcb"
 
