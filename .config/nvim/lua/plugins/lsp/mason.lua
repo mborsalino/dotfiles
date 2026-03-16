@@ -35,12 +35,16 @@ return {
         -- "rust_analyzer",
         "clangd",
         -- "pylsp", -- pyright is an alternative
-        "pyright",
         -- "pyre"
         "ruff",
       },
       -- auto-install configured servers (with lspconfig)
       automatic_installation = true, -- not the same as ensure_installed
+      -- Disable automatic vim.lsp.enable() for installed servers.
+      -- Without this, mason-lspconfig auto-enables every installed server,
+      -- causing duplicates when servers are also explicitly set up via
+      -- lspconfig[server].setup() or vim.lsp.enable() in lspconfig.lua.
+      automatic_enable = false,
     })
 
     mason_tool_installer.setup({
@@ -48,7 +52,7 @@ return {
         "clang-format",
         "prettier", -- prettier formatter
         "stylua", -- lua formatter
-        "ruff",
+        -- ruff is already in mason_lspconfig ensure_installed
         "jedi-language-server",
       },
     })

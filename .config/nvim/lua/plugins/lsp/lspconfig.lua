@@ -127,17 +127,25 @@ return {
     lspconfig["ruff"].setup {
       init_options = {
         settings = {
-          lint = {
-              -- ignore = {"E4", "E7"}
-            ignore = {'E203', -- whitespace before : 
-                      'E228', -- space around modulo  
-               }
+          configuration = {
+            lint = {
+              ignore = {'E203', -- whitespace before : 
+                        'E228', -- space around modulo  
+                     }
+            }
           }
         }
       }
     }
 
-    -- -- configure python server
+    -- NOTE: pylsp is commented out. If it's installed (via Mason or system-wide),
+    -- Neovim 0.11+ may auto-detect and start it from PATH without an explicit
+    -- setup call. If pylsp appears in :LspInfo unexpectedly, uninstall it with
+    -- :MasonUninstall python-lsp-server (or remove it from PATH).
+    -- The same applies to pyright or any other LSP server — being in Mason's
+    -- ensure_installed or simply installed on the system is enough for Neovim
+    -- to auto-start it, even without a lspconfig setup block.
+    --
     -- lspconfig["pylsp"].setup({
     --   capabilities = capabilities,
     --   on_attach = on_attach,
@@ -145,6 +153,7 @@ return {
     --       pylsp = {
     --           plugins = {
     --               pycodestyle = {
+    --                 ignore = {'E124', 'E203', 'E228'},
     --               }
     --           }
     --       }
@@ -173,19 +182,19 @@ return {
       },
     })
 
-    vim.lsp.enable("jedi-language-server")
-    vim.lsp.config("jedi-language-server", {
-      cmd = { "jedi-language-server" },
-      filetypes = { "python" },
-      root_markers = {
-        "pyproject.toml",
-        "setup.py",
-        "setup.cfg",
-        "requirements.txt",
-        "Pipfile",
-        ".git",
-      }
-    })
+    -- vim.lsp.enable("jedi-language-server")
+    -- vim.lsp.config("jedi-language-server", {
+    --   cmd = { "jedi-language-server" },
+    --   filetypes = { "python" },
+    --   root_markers = {
+    --     "pyproject.toml",
+    --     "setup.py",
+    --     "setup.cfg",
+    --     "requirements.txt",
+    --     "Pipfile",
+    --     ".git",
+    --   }
+    -- })
 
 
     -- Show diagnostics in virtual lines
