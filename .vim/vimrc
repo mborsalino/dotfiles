@@ -525,7 +525,10 @@ set updatetime=500
 " ---------
 let $FZF_DEFAULT_COMMAND="rg --files --hidden -g '!.git'"
 nnoremap <silent> <Leader>b :Buffers<CR>
-nnoremap <silent> <Leader>f :Files<CR>
+" fuzzy find files
+nnoremap <silent> <Leader>ff :Files<CR>
+" fuzzy find files matching word under cursor
+nnoremap <silent> <Leader>fw :call fzf#vim#files('', {'options': ['--query', expand('<cword>')]})<CR>
 nnoremap <silent> <Leader>/ :BLines<CR>
 nnoremap <silent> <Leader>' :Marks<CR>
 nnoremap <silent> <Leader>gC :Commits<CR>
