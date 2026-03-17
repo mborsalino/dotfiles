@@ -26,7 +26,7 @@ return {
             side = "topleft",  -- or "botright", location of the explorer window
             session = "",      -- or "global" / "local" / "shared"
             tabs = true,       -- separate nnn instance per tab
-            fullscreen = true, -- whether to fullscreen explorer window when current tab is empty
+            fullscreen = false, -- always open as side panel, even on empty tab
           },
           picker = {
             cmd = "nnn",       -- command override (-p flag is implied)
