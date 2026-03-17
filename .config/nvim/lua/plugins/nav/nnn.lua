@@ -62,8 +62,6 @@ return {
           windownav = {        -- window movement mappings to navigate out of nnn
             left = "<C-h>",
             right = "<C-l>",
-            next = false,      -- disabled: conflicts with <C-w> cd_to_path mapping
-            prev = false,      -- disabled: conflicts with <C-w> cd_to_path mapping
           },
           buflisted = false,   -- whether or not nnn buffers show up in the bufferlist
           quitcd = nil,        -- or "cd" / tcd" / "lcd", command to run on quitcd file if found
