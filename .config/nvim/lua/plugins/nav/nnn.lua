@@ -4,6 +4,21 @@ return {
         local nnn = require("nnn")
         local builtin = require("nnn").builtin
 
+        -- cd nvim to nnn's current directory by reading /proc/<pid>/cwd
+        -- Works on both files and directories (bypasses nnn's Enter handling)
+        local function cd_to_nnn_cwd()
+            local buf = vim.api.nvim_get_current_buf()
+            local chan = vim.bo[buf].channel
+            if chan and chan > 0 then
+                local pid = vim.fn.jobpid(chan)
+                local cwd = vim.loop.fs_readlink("/proc/" .. pid .. "/cwd")
+                if cwd then
+                    vim.cmd("cd " .. vim.fn.fnameescape(cwd))
+                    vim.defer_fn(function() vim.notify("pwd: " .. cwd) end, 100)
+                end
+            end
+        end
+
         local cfg = {
           explorer = {
             cmd = "nnn",       -- command override (-F1 flag is implied, -a flag is invalid!)
@@ -42,20 +57,30 @@ return {
             { "<C-s>", builtin.open_in_vsplit },    -- open file(s) in vertical split
             { "<C-p>", builtin.open_in_preview },   -- open file in preview split keeping nnn focused
             { "<C-y>", builtin.copy_to_clipboard }, -- copy file(s) to clipboard
-            { "<C-w>", builtin.cd_to_path },        -- cd to file directory
             { "<C-e>", builtin.populate_cmdline },  -- populate cmdline (:) with file(s)
           },       -- table containing mappings
           windownav = {        -- window movement mappings to navigate out of nnn
             left = "<C-h>",
             right = "<C-l>",
-            next = "<C-w>w",
-            prev = "<C-w>W",
+            next = false,      -- disabled: conflicts with <C-w> cd_to_path mapping
+            prev = false,      -- disabled: conflicts with <C-w> cd_to_path mapping
           },
           buflisted = false,   -- whether or not nnn buffers show up in the bufferlist
           quitcd = nil,        -- or "cd" / tcd" / "lcd", command to run on quitcd file if found
           offset = false,      -- whether or not to write position offset to tmpfile(for use in preview-tui)
         }
         nnn.setup(cfg)
+
+        -- Ctrl+b: cd nvim to nnn's current directory ("browse here" / "base dir")
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = "nnn",
+            callback = function()
+                vim.keymap.set("t", "<C-b>", function()
+                    cd_to_nnn_cwd()
+                    vim.cmd("startinsert")
+                end, { buffer = true })
+            end,
+        })
     end
 }
 
