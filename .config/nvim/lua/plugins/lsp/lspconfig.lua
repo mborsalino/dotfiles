@@ -6,9 +6,6 @@ return {
     { "antosha417/nvim-lsp-file-operations", config = true },
   },
   config = function()
-    -- import lspconfig plugin
-    local lspconfig = require("lspconfig")
-
     -- import cmp-nvim-lsp plugin
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
@@ -24,47 +21,46 @@ return {
 
       -- set keybinds
       opts.desc = "LSP: show references"
-      keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts) -- show definition, references
+      keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts)
 
       opts.desc = "LSP: go to declaration"
-      keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- go to declaration
+      keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
 
       opts.desc = "LSP: show definitions"
-      keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- show lsp definitions
+      keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts)
 
       opts.desc = "LSP: show implementations"
-      keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts) -- show lsp implementations
+      keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts)
 
       opts.desc = "LSP: type definitions"
-      keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts) -- show lsp type definitions
+      keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts)
 
       opts.desc = "LSP: See available code actions"
-      keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
+      keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
 
       opts.desc = "LSP: Smart rename"
-      keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- smart rename
+      keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
 
       opts.desc = "Show buffer diagnostics"
-      keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts) -- show  diagnostics for file
+      keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts)
 
       opts.desc = "Show line diagnostics"
-      keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
+      keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
 
       opts.desc = "Go to previous diagnostic"
-      keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- jump to previous diagnostic in buffer
+      keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
 
       opts.desc = "Go to next diagnostic"
-      keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- jump to next diagnostic in buffer
+      keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
 
       opts.desc = "Show documentation for what is under cursor"
-      keymap.set("n", "<leader>k", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
+      keymap.set("n", "<leader>k", vim.lsp.buf.hover, opts)
 
       opts.desc = "Restart LSP"
-      keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+      keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
 
       opts.desc = "Show code actions"
       keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-
 
     end
 
@@ -72,8 +68,7 @@ return {
     local capabilities = cmp_nvim_lsp.default_capabilities()
 
     -- Change the Diagnostic symbols in the sign column (gutter)
-    -- (not in youtube nvim video)
-    local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
+    local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
     for type, icon in pairs(signs) do
       local hl = "DiagnosticSign" .. type
       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
@@ -82,97 +77,58 @@ return {
     -- ----------------------------
     -- Setup individual LSP servers
     -- ----------------------------
-    --
+
     -- configure rust server
-    lspconfig["rust_analyzer"].setup({
+    vim.lsp.config("rust_analyzer", {
       capabilities = capabilities,
       on_attach = on_attach,
       cmd = {"/home/mborsali/.cargo/bin/rust-analyzer"},
       settings = {
-          ["rust-analyzer"] = {
-              cargo = {
-                  targetDir = true
-              },
-              checkOnSave = true,
-          }
+        ["rust-analyzer"] = {
+          cargo = {
+            targetDir = true
+          },
+          checkOnSave = true,
+        }
       }
     })
 
-    -- configure clangd server with plugin
-    lspconfig["clangd"].setup({
+    -- configure clangd server
+    vim.lsp.config("clangd", {
       capabilities = capabilities,
       on_attach = on_attach,
     })
 
-    -- -- configure python server
-    -- lspconfig["pyright"].setup({
-    --   capabilities = capabilities,
-    --   on_attach = on_attach,
-    --   settings = {
-    --     pyright = {
-    --         -- Using Ruff's import organizer
-    --         disableOrganizeImports = true,
-    --     },
-    --     python = {
-    --         analysis = {
-    --             -- Ignore all files for analysis to exclusively user Ruff for linting
-    --             ignore = { '*' },
-    --             typeCheckingMode = "off",
-    --         }
-    --     },
-    --   },
-    -- })
-
-
-    lspconfig["ruff"].setup {
+    -- configure ruff (python linter)
+    vim.lsp.config("ruff", {
       init_options = {
         settings = {
           configuration = {
             lint = {
-              ignore = {'E203', -- whitespace before : 
-                        'E228', -- space around modulo  
+              ignore = {'E203', -- whitespace before :
+                        'E228', -- space around modulo
                      }
             }
           }
         }
       }
-    }
+    })
 
     -- NOTE: pylsp is commented out. If it's installed (via Mason or system-wide),
     -- Neovim 0.11+ may auto-detect and start it from PATH without an explicit
     -- setup call. If pylsp appears in :LspInfo unexpectedly, uninstall it with
     -- :MasonUninstall python-lsp-server (or remove it from PATH).
-    -- The same applies to pyright or any other LSP server — being in Mason's
-    -- ensure_installed or simply installed on the system is enough for Neovim
-    -- to auto-start it, even without a lspconfig setup block.
-    --
-    -- lspconfig["pylsp"].setup({
-    --   capabilities = capabilities,
-    --   on_attach = on_attach,
-    --   settings = {
-    --       pylsp = {
-    --           plugins = {
-    --               pycodestyle = {
-    --                 ignore = {'E124', 'E203', 'E228'},
-    --               }
-    --           }
-    --       }
-    --   }
-    -- })
-
 
     -- configure lua server (with special settings)
-    lspconfig["lua_ls"].setup({
+    vim.lsp.config("lua_ls", {
       capabilities = capabilities,
       on_attach = on_attach,
-      settings = { -- custom settings for lua
+      settings = {
         Lua = {
-          -- make the language server recognize "vim" global
           diagnostics = {
             globals = { "vim" },
           },
           workspace = {
-            -- make language server aware of runtime files
             library = {
               [vim.fn.expand("$VIMRUNTIME/lua")] = true,
               [vim.fn.stdpath("config") .. "/lua"] = true,
@@ -182,20 +138,28 @@ return {
       },
     })
 
-    -- vim.lsp.enable("jedi-language-server")
-    -- vim.lsp.config("jedi-language-server", {
-    --   cmd = { "jedi-language-server" },
-    --   filetypes = { "python" },
-    --   root_markers = {
-    --     "pyproject.toml",
-    --     "setup.py",
-    --     "setup.cfg",
-    --     "requirements.txt",
-    --     "Pipfile",
-    --     ".git",
-    --   }
-    -- })
+    -- configure jedi (python intellisense)
+    vim.lsp.config("jedi-language-server", {
+      cmd = { "jedi-language-server" },
+      filetypes = { "python" },
+      root_markers = {
+        "pyproject.toml",
+        "setup.py",
+        "setup.cfg",
+        "requirements.txt",
+        "Pipfile",
+        ".git",
+      }
+    })
 
+    -- Enable all configured servers
+    vim.lsp.enable({
+      "rust_analyzer",
+      "clangd",
+      "ruff",
+      "lua_ls",
+      "jedi-language-server",
+    })
 
     -- Show diagnostics in virtual lines
     vim.diagnostic.config({virtual_text = true, virtual_lines = false})
