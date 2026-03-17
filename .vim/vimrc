@@ -360,12 +360,66 @@ cnoreabbrev tbart TagbarToggle
 " Zoom pane shortcut
 cnoreabbrev zo ZoomToggle
 
-" Vertical resize (right)
-map <A-Up> :vertical resize +5<CR>
-" map <F6> :vertical resize +5<CR>
-" Vertical resize (left)
-map <A-Down> :vertical resize -5<CR>
-" map <F7> :vertical resize -5<CR>
+" Smart pane resize — see lua block below
+lua << EOF
+-- Smart pane resize: expand or shrink the current pane in the arrow direction.
+--
+-- dir: one of "left", "right", "up", "down" — the direction of the resize.
+--
+-- winnr() returns the number (1-based index) of the currently focused window.
+-- We use it to detect whether a wincmd jump actually moved us to a different
+-- window. If winnr() is the same after the jump, there's no neighbor there.
+--
+-- Behavior:
+--   - If there's a neighbor in the requested direction, expand toward it.
+--   - If not, but there's a neighbor in the opposite direction, shrink away from it.
+--   - If no neighbor in either direction, notify the user.
+
+local function smart_resize(dir)
+  local cur = vim.fn.winnr()
+
+  -- Direction and its opposite
+  local wincmds  = { left = "h", right = "l", up = "k", down = "j" }
+  local opposite = { left = "right", right = "left", up = "down", down = "up" }
+
+  -- Resize commands: expand = grow current pane, shrink = shrink current pane
+  -- Direction only determines which neighbor to check, not the resize sign.
+  local is_vertical = (dir == "left" or dir == "right")
+  local expand_cmd = is_vertical and "vertical resize +5" or "resize +5"
+  local shrink_cmd = is_vertical and "vertical resize -5" or "resize -5"
+
+  -- Check if neighbor exists in the requested direction
+  vim.cmd("wincmd " .. wincmds[dir])
+  if vim.fn.winnr() ~= cur then
+    -- Neighbor exists in this direction: expand toward it
+    vim.cmd(cur .. "wincmd w")
+    vim.cmd(expand_cmd)
+    return
+  end
+
+  -- No neighbor in that direction; check the opposite side
+  vim.cmd("wincmd " .. wincmds[opposite[dir]])
+  if vim.fn.winnr() ~= cur then
+    -- Neighbor exists on opposite side: shrink current pane
+    vim.cmd(cur .. "wincmd w")
+    vim.cmd(shrink_cmd)
+    return
+  end
+
+  -- No neighbor in either direction
+  vim.notify("Can't resize in this direction")
+end
+
+-- Bind Alt+Arrow and Alt+hjkl keys to smart resize
+vim.keymap.set("", "<A-Left>",  function() smart_resize("left") end)
+vim.keymap.set("", "<A-Right>", function() smart_resize("right") end)
+vim.keymap.set("", "<A-Up>",    function() smart_resize("up") end)
+vim.keymap.set("", "<A-Down>",  function() smart_resize("down") end)
+vim.keymap.set("", "<A-h>",     function() smart_resize("left") end)
+vim.keymap.set("", "<A-l>",     function() smart_resize("right") end)
+vim.keymap.set("", "<A-k>",     function() smart_resize("up") end)
+vim.keymap.set("", "<A-j>",     function() smart_resize("down") end)
+EOF
 "
 
 " Switch focus to the leftmost window.
