@@ -33,7 +33,7 @@ nnn_wrap ()
 }
 
 # Plugins to be used and corresponding shortcut to trigger them
-export NNN_PLUG='j:autojump;f:fzopen;p:preview-tui;i:imgview'
+export NNN_PLUG='j:autojump;f:fzopen;p:preview-tui;i:imgview;n:nvimcd'
 
 # Bookmakrs to be used and corresponding shortcut to trigger them
 export NNN_BMS="b:$HOME/.config/nnn/bookmarks;p:$HOME/proj/mst/stellar/prod/gme/src/python/pygme;g:$HOME/proj/mst/stellar/prod/gme/src/;s:$HOME/proj/mst/stellar"

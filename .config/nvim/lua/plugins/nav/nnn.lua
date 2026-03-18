@@ -19,9 +19,20 @@ return {
             end
         end
 
+        -- Find the nnn terminal buffer channel.
+        local function get_nnn_chan()
+            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+                if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].filetype == "nnn" then
+                    local chan = vim.bo[buf].channel
+                    if chan and chan > 0 then return chan end
+                end
+            end
+            return nil
+        end
+
         local cfg = {
           explorer = {
-            cmd = "nnn",       -- command override (-F1 flag is implied, -a flag is invalid!)
+            cmd = "nnn",       -- command override (-F1 flag is implied by nnn.nvim)
             width = 24,        -- width of the vertical split
             side = "topleft",  -- or "botright", location of the explorer window
             session = "",      -- or "global" / "local" / "shared"
@@ -69,7 +80,7 @@ return {
         }
         nnn.setup(cfg)
 
-        -- Ctrl+b: cd nvim to nnn's current directory ("browse here" / "base dir")
+        -- Ctrl+b (in nnn): cd nvim to nnn's current directory ("browse here")
         vim.api.nvim_create_autocmd("FileType", {
             pattern = "nnn",
             callback = function()
@@ -79,6 +90,35 @@ return {
                 end, { buffer = true })
             end,
         })
+
+        -- <Leader>nf (in buffer): navigate nnn to current file's directory.
+        -- Mnemonic: nnn follow
+        -- Writes the target path to /tmp/nnn-goto then triggers the "nvimcd"
+        -- plugin (;n) via chansend. The plugin reads the path and calls nnn_cd
+        -- to navigate nnn in the current context.
+        vim.keymap.set("n", "<Leader>nf", function()
+            local dir = vim.fn.expand("%:p:h")
+            if dir == "" then
+                vim.notify("Buffer has no file")
+                return
+            end
+            local chan = get_nnn_chan()
+            if not chan then
+                vim.notify("nnn not running")
+                return
+            end
+            -- Write target dir to the file the nvimcd plugin reads
+            local f = io.open("/tmp/nnn-goto", "w")
+            if not f then
+                vim.notify("Failed to write /tmp/nnn-goto")
+                return
+            end
+            f:write(dir)
+            f:close()
+            -- Trigger the nvimcd plugin: ; enters plugin mode, n selects it
+            vim.fn.chansend(chan, ";n")
+            vim.notify("nnn → " .. dir)
+        end, { desc = "nnn: follow current file" })
     end
 }
 

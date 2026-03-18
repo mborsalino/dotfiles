@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+
+# Description: Navigate to a directory path read from /tmp/nnn-goto.
+# Used by neovim's <Leader>nf keybinding to sync nnn to the current buffer.
+#
+# Shell: POSIX compliant
+
+# shellcheck disable=SC1090,SC1091
+. "$(dirname "$0")"/.nnn-plugin-helper
+
+target="/tmp/nnn-goto"
+
+if [ ! -f "$target" ]; then
+    exit 1
+fi
+
+dir=$(cat "$target")
+rm -f "$target"
+
+if [ -d "$dir" ]; then
+    nnn_cd "$dir" 0
+fi
