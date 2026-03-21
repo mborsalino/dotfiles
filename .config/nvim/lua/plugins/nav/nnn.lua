@@ -91,6 +91,21 @@ return {
             end,
         })
 
+        -- <Leader>ng: jump to the nnn pane from any window.
+        -- Mnemonic: nnn go
+        vim.keymap.set("n", "<Leader>ng", function()
+            for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+                local buf = vim.api.nvim_win_get_buf(win)
+                if vim.bo[buf].filetype == "nnn" then
+                    vim.api.nvim_set_current_win(win)
+                    vim.cmd("startinsert")
+                    return
+                end
+            end
+            -- nnn not open — open it
+            nnn.toggle("explorer")
+        end, { desc = "Focus nnn pane" })
+
         -- <Leader>nf (in buffer): navigate nnn to current file's directory.
         -- Mnemonic: nnn follow
         -- Writes the target path to /tmp/nnn-goto then triggers the "nvimcd"
