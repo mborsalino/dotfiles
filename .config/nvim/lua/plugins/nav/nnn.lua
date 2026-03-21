@@ -81,11 +81,25 @@ return {
         nnn.setup(cfg)
 
         -- Ctrl+b (in nnn): cd nvim to nnn's current directory ("browse here")
+        -- Ctrl+g (in nnn): show nnn's current directory as notification ("get path")
         vim.api.nvim_create_autocmd("FileType", {
             pattern = "nnn",
             callback = function()
                 vim.keymap.set("t", "<C-b>", function()
                     cd_to_nnn_cwd()
+                    vim.cmd("startinsert")
+                end, { buffer = true })
+
+                vim.keymap.set("t", "<C-g>", function()
+                    local buf = vim.api.nvim_get_current_buf()
+                    local chan = vim.bo[buf].channel
+                    if chan and chan > 0 then
+                        local pid = vim.fn.jobpid(chan)
+                        local cwd = vim.loop.fs_readlink("/proc/" .. pid .. "/cwd")
+                        if cwd then
+                            vim.notify(cwd)
+                        end
+                    end
                     vim.cmd("startinsert")
                 end, { buffer = true })
             end,
