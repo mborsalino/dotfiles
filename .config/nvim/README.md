@@ -10,6 +10,7 @@ Bidirectional directory sync between neovim and nnn via [nnn.nvim](https://githu
 |-----|---------|--------|----------|
 | `<C-b>` | nnn terminal | cd neovim to nnn's current directory | **b**rowse here |
 | `<Leader>nf` | normal buffer | navigate nnn to current file's directory | **n**nn **f**ollow |
+| `<Leader>ng` | normal buffer | jump to nnn pane (opens it if closed) | **n**nn **g**o |
 
 ### How `<Leader>nf` works
 
