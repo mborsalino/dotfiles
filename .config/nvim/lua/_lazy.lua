@@ -23,7 +23,7 @@ require("lazy").setup(
     },
     {
         checker = {
-            enabled = true,
+            enabled = false, -- disable auto-check; run :Lazy check manually to avoid "running task log" messages
             notify = false,
         },
         change_detection = {
