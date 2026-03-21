@@ -33,3 +33,15 @@ Bidirectional directory sync between neovim and nnn via [nnn.nvim](https://githu
 Reads the nnn process's current working directory from `/proc/<pid>/cwd` via
 `vim.fn.jobpid()` and `vim.loop.fs_readlink()`. This bypasses nnn's mapping
 system entirely (set via a neovim `FileType` autocmd on the nnn buffer).
+
+## Markdown Preview
+
+In-buffer markdown rendering via [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim).
+
+| Key | Action | Mnemonic |
+|-----|--------|----------|
+| `<Leader>mr` | Toggle between rendered and raw source | **m**arkdown **r**ender |
+
+By default, markdown files open in raw source mode. Press `<Leader>mr` to
+toggle the rendered view, which styles headers, tables, checkboxes, and
+inline formatting directly in the buffer.
