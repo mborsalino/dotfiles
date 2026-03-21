@@ -1,0 +1,1346 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NOCOLOR='\033[0m'
+
+log_progress () {
+    echo "$(date): $1" >> $tmp/make_sicoe_env_install.log
+}
+
+# The following relies on global vars (subset and exclude_texlive)
+set_env_vars() {
+
+    if [[ $subset == all ]]; then 
+        ENV_MOD=1
+        CFG_FILE=1
+        RUSTUP=1
+        RUST_APPS=1
+        MDBOOK=1
+        NNN=1
+        VIM=1
+        NEOVIM=1
+        FZF=1
+        COPILOT_CLI=1
+        PYTHON=1
+        DONGLES=1
+        SEVENZIP=1
+        DOXYGEN=1
+        GRAPHVIZ=1
+        if [[ $excl_texlive ]]; then
+            TEXLIVE=0
+        else
+            TEXLIVE=1
+        fi
+        LSUIO=1
+        CTAGS=1
+        TAR=1
+        TIG=1
+        GLOW=1
+    elif [[ $subset == necessary ]]; then
+        ENV_MOD=1
+        CFG_FILE=1
+        RUSTUP=1
+        RUST_APPS=0
+        MDBOOK=1
+        NNN=0
+        VIM=0
+        NEOVIM=0
+        FZF=0
+        COPILOT_CLI=0
+        PYTHON=1
+        DONGLES=1
+        SEVENZIP=1
+        DOXYGEN=1
+        GRAPHVIZ=0
+        if [[ -n $excl_texlive ]]; then
+            TEXLIVE=0
+        else
+            TEXLIVE=1
+        fi
+        LSUIO=0
+        CTAGS=0
+        TAR=1
+        TIG=0
+        GLOW=0
+    elif [[ $subset == optional ]]; then
+        ENV_MOD=0
+        CFG_FILE=0
+        RUSTUP=0
+        RUST_APPS=1
+        MDBOOK=0
+        NNN=1
+        VIM=1
+        NEOVIM=1
+        FZF=1
+        COPILOT_CLI=1
+        PYTHON=0
+        DONGLES=0
+        SEVENZIP=0
+        DOXYGEN=0
+        GRAPHVIZ=1
+        TEXLIVE=0
+        LSUIO=1
+        CTAGS=1
+        TAR=0
+        TIG=1
+        GLOW=1
+    elif [[ $subset == filter ]]; then
+        printf "${CYAN}Using custom set. "
+        printf "We trust you took care of setting the appropriate env vars"
+        printf "${NOCOLOR}\n"
+        [ -z $ENV_MOD ] && ENV_MOD=0
+        [ -z $CFG_FILE ] && CFG_FILE=0
+        [ -z $RUSTUP ] && RUSTUP=0
+        [ -z $RUST_APPS ] && RUST_APPS=0
+        [ -z $MDBOOK ] && MDBOOK=0
+        [ -z $NNN ] && NNN=0
+        [ -z $VIM ] && VIM=0
+        [ -z $NEOVIM ] && NEOVIM=0
+        [ -z $FZF ] && FZF=0
+        [ -z $COPILOT_CLI ] && COPILOT_CLI=0
+        [ -z $PYTHON ] && PYTHON=0
+        [ -z $DONGLES ] && DONGLES=0
+        [ -z $SEVENZIP ] && SEVENZIP=0
+        [ -z $DOXYGEN ] && DOXYGEN=0
+        [ -z $GRAPHVIZ ] && GRAPHVIZ=0
+        [ -z $TEXLIVE ] && TEXLIVE=0
+        [ -z $LSUIO ] && LSUIO=0
+        [ -z $CTAGS ] && CTAGS=0
+        [ -z $TAR ] && TAR=0
+        [ -z $TIG ] && TIG=0
+        [ -z $GLOW ] && GLOW=0
+    else
+        printf "${RED} Unrecognized argument to --which${NOCOLOR}\n"
+        exit 1
+    fi
+
+    # No matter which set was chosen, honor TEXLIVE_LOCAL if defined
+    if [[ -z $TEXLIVE_LOCAL ]]; then
+        TEXLIVE_LOCAL=0
+    fi
+}
+
+
+usage=$( cat<<EOF
+make_sicoe_env [-h] --which <set_name> [options]
+
+Build and centrally install all Linux tools used by the SICOE group.
+
+For each tool that is built and installed, a corresponding modulefile
+is created. The tool can be brought to the user environment using
+module load <toolname>. Use "module avail" to see a list of all available
+modules.
+
+The script will automatically detect the running OS. If you're working in an
+Network filesystem and access it from different OSes, then you'll have to
+run this script once per OS.
+
+
+Options:
+
+--keep-tmp
+    Do not remove temporary files. This is used for debug purposes.
+
+--root <root_dir>
+    Mandatory option.
+    Ther root dir under which the environment will be installed.
+    On Altera labs/farm this must be: /p/psg/swip/w/psg_sicoe
+
+--which <set_name>
+    Mandatory option.
+    Only build tools in one of the following pre-defined sets:
+        necessary
+            Build only stuff that is strictly required.
+        optional
+            Build only optional tools (such as vim, fzf, rust applications etc.)
+            This assumes you've run --necessary in the past and everything is
+            up to date.
+        all
+            Build required + optional tools
+        filter
+            Build only the tools specified by the env vars that are described
+            below.
+
+--exclude-texlive
+    Requires --which=all or --which=necessary
+    TexLive is required by Doxygen to create API docs. Manual installation and
+    package downloads is only necessary on Linux distros where we do not have
+    control over system-level packages (e.g. the farm).
+    On standalone systems (e.g. ubuntu) you can specify this option and install
+    a "full" or "recommended" texlive set of system packages using apt/yum.
+    * This is not recommended: if doxygen fails no support will be provided *
+
+Any of the following env vars can be set to 1 to only install a custom subset
+of the sicoe tools. This is useful when a new tool is added, or one of the
+components needs to be updated. 
+
+The environment variables are only honored if --which=filter is specified. They
+will be ignored if custom=necessary/optional/all.
+
+ENV_MOD
+    Install and configure environment-modules
+
+CFG_FILE
+    Install the sbruf.env.bash config file
+
+RUSTUP
+    The rust build/install system.
+
+RUST_APPS
+    This builds a bunch of utilities written in rust (exa, fd, rg, starship etc.)
+    Requires RUSTUP
+
+MDBOOK
+    The markdown book generation required by SST (requires RUSTUP)
+
+NNN
+    The nnn file manager
+
+VIM
+    A very recent version of the Vim editor
+
+NEOVIM
+    Neovim 
+
+FZF
+    Fuzzy finder
+
+COPILOT_CLI
+    The GitHub Copilot CLI
+
+PYTHON
+    The Python version required by the SST development
+
+PYTHON_PACKAGES
+    All python packages that are required by SST.
+    Forced to 1 when PYTHON=1, use it with PYTHON=0 to upgrade to the latest
+    package list.
+
+DONGLES
+    The USB dongle third-party libs used by SST (Cheetah, Sub20, FTDI, libusb)
+
+SEVENZIP
+    The 7z compression utility
+
+DOXYGEN
+    Doxygen
+
+GRAPHVIZ
+    Graphviz graph visualization tools (dot, neato, etc.)
+
+TEXLIVE
+    Texlive
+
+LSUIO
+    lsuio utility
+
+CTAGS
+    exuberant ctags
+
+TAR
+    GNU tar
+
+GLOW
+    Terminal markdown renderer (charmbracelet/glow)
+
+The following env var can be used to debug texlive installation:
+
+TEXLIVE_LOCAL
+    Default to 0. Set to 1 to avoid downloading Texlive on subsequent runs.
+    Used to debug this script, needs --keep-tmp option in conjunction, will
+    work with any --which setting.
+
+Examples:
+-------
+# First-time install on standalone if you have your own set of productivity stuff
+make_sicoe_env --root=$HOME/sicoe --which=necessary 
+
+# First-time installation on standalon if you want optional productivity stuff
+make_sicoe_env --root=$HOME/sicoe --which=all 
+
+# Installation for newly supported OS on PSG NFS
+make_sicoe_env --root=/p/psg/swip/w/psg_sicoe --which=all
+
+# Grap update on config file
+CFG_FILE=1 make_sicoe_env --root=$HOME/sicoe --which=filter 
+
+# Grap update on required Python and Python packages
+PYTHON=1 PYTHON_PACKAGES=1 make_sicoe_env --root=$HOME/sicoe --which=filter 
+
+EOF
+)
+
+# set shell to exit immediately if a pipeline fails
+set -e
+# use GNU getopt to retrieve option string orig_args=$@
+OPTS=`getopt -n $0 -o h -l help,which:,root:,keep-tmp,exclude-texlive -- "$@"`
+# set the positional parameters to the ones returned by getopt
+eval set -- "$OPTS"
+
+# scan the options
+keep_tmp=
+subset=
+root=
+exclude_texlive=
+while true
+do
+    case "$1" in
+        -h|--help)
+            echo "$usage";
+            exit 1
+            ;;
+        --which)
+           subset=$2
+           shift 2
+           ;;
+        --root)
+           # strip trailing slash
+           root="${2%/}"
+           shift 2
+           ;;
+        --keep-tmp)
+           keep_tmp=1
+           shift
+           ;;
+        --exclude-texlive)
+           exclude_texlive=1
+           shift
+           ;;
+        --)
+            shift
+            break
+            ;;
+    esac
+done
+
+# Arg check
+if [[ -z $subset ]]; then
+    printf "${RED}ERROR: --which is a mandatory option${NOCOLOR}\n"
+    exit 1
+fi
+if [[ -n $exclude_texlive && ($subset == filter || $subset == optional) ]]; then
+    printf "${RED}ERROR: --exclude-texlive is ony valid with --which='all' and 'necessary'{NOCOLOR}\n"
+    exit 1
+fi
+
+# Set all variables that steer the installation
+set_env_vars $subset "$exclude_texlive"
+
+# Detect OS
+os_rel=$(cat /etc/os-release)
+if [[ $os_rel =~ 'NAME="Ubuntu"' && $os_rel =~ 'VERSION_ID="20.04"' ]]; then
+    os=ubu20
+elif [[ $os_rel =~ 'NAME="Ubuntu"' && $os_rel =~ 'VERSION_ID="22.04"' ]]; then
+    os=ubu22
+elif [[ $os_rel =~ 'NAME="Ubuntu"' && $os_rel =~ 'VERSION_ID="24.04"' ]]; then
+    os=ubu24
+elif [[ $os_rel =~ 'NAME="SLES"' && $os_rel =~ 'VERSION_ID="12.5"' ]]; then
+    os=suse12
+elif [[ $os_rel =~ 'NAME="SLES"' && $os_rel =~ 'VERSION_ID="15.4"' ]]; then
+    os=suse15
+elif [[ $os_rel =~ 'NAME="Rocky Linux"' && $os_rel =~ 'VERSION_ID="8' ]]; then
+    os=rocky8
+elif [[ $os_rel =~ 'NAME="Red Hat Enterprise Linux"' && $os_rel =~ 'VERSION_ID="8.4"' ]]; then
+    os=rhl8
+else
+    printf "${RED}ERROR: unsupported OS: $os_rel${NOCOLOR}\n"
+    exit 1
+fi
+
+if [ -z $root ]; then
+    echo "ERROR: --root is a mandatory option"
+    exit 1
+else
+    # create root dir and make sure it's group-writable (use if to avoid spending a long time with chown)
+    if [[ ! -d $root ]]; then
+        sudo mkdir -pv $root
+        mygrp=$(groups | cut -f 1 -d " ")
+        sudo chown -R $USER.$mygrp $root
+    fi
+fi
+
+# Keep everything below unchanged
+opt_root=$root/opt
+tmp=$root/tmp/sicoe_env
+mkdir -p $tmp
+
+if [[ -z $keep_tmp ]]; then
+    echo "Cleaning up $tmp directory ..."
+    rm -rf $tmp
+fi
+modulefiles_root=$root/modulefiles
+modulefiles_os_root=$root/modulefiles/$os
+config_dir=$root/cfg
+mkdir -p $opt_root
+mkdir -p $tmp
+mkdir -p $modulefiles_root
+mkdir -p $modulefiles_os_root
+mkdir -p $config_dir
+config_file=$config_dir/sbruf.env.bash
+
+# retrieve directory of the running script
+script_dir=$(dirname "$(readlink -f "$0")")
+
+if (( ENV_MOD == 1 )); then
+    log_progress "ENV_MOD"
+
+    # First of all, build and install a statically-linked version of Tcl
+    cd $tmp
+    wget https://sourceforge.net/projects/tcl/files/Tcl/8.6.13/tcl8.6.13-src.tar.gz/download -O tcl8.6.13-src.tar.gz 
+    tar -xf tcl8.6.13-src.tar.gz
+    cd tcl8.6.13/unix
+    tcl_inst_dir=$opt_root/$os/modules/tcl
+    mkdir -p $tcl_inst_dir
+    ./configure --prefix=$tcl_inst_dir --enable-shared=no --enable-threads
+    make install
+    cd $tcl_inst_dir/bin && ln -s tclsh8.6 tclsh
+
+    # Now take care of environment modules
+    cd $tmp
+    curl -LJO https://github.com/cea-hpc/modules/releases/download/v5.6.1/modules-5.6.1.tar.gz
+    tar xfz modules-5.6.1.tar.gz
+    cd modules-5.6.1
+
+    # Ensure modules use our static tcl when installed. This way the static tclsh path will
+    # be hardcoded in the module scripts (see SICOE-3)
+    ./configure --prefix=$opt_root/$os/modules --with-tclsh=$tcl_inst_dir/bin/tclsh \
+        --with-tclinclude=$tcl_inst_dir/include --with-tcl=$tcl_inst_dir/lib
+    make install
+fi
+
+if (( PYTHON == 1 )); then
+    log_progress "PYTHON"
+    PYTHON_PACKAGES=1
+    DONGLES_CH_PY=1
+    py_maj_ver=3.13
+    py_ver=3.13.3
+    if (( PYTHON_DBG == 1 )); then 
+        py_pfx=$opt_root/$os/python/${py_ver}.dbg
+    else
+        py_pfx=$opt_root/$os/python/$py_ver
+    fi
+    cd $tmp
+    # download python, unzip, cd into directory
+    wget https://www.python.org/ftp/python/$py_ver/Python-$py_ver.tgz 
+    echo "Extracting tgz ..."
+    tar zxf Python-$py_ver.tgz
+    cd Python-$py_ver
+
+    # build and install Python
+    echo "Running configure ..."
+    if (( PYTHON_DBG == 1 )); then
+        ./configure --enable-shared --with-address-sanitizer --with-pydebug --prefix=$py_pfx --disable-ipv6
+    else
+        ./configure --enable-shared --enable-optimizations --prefix=$py_pfx
+    fi
+    make install
+
+    # create virtual environment
+    echo "Creating virtual env ..."
+    cd $py_pfx
+    export LD_LIBRARY_PATH=$PWD/lib:$LD_LIBRARY_PATH
+    ./bin/python3 -m venv env/default
+
+    # make sure virtual environment is in your path
+    cd ~
+    export PATH=$py_pfx/env/default/bin:${PATH}
+    incl_dir=$(python3 -c "import sysconfig; print(sysconfig.get_paths()['include'])")
+
+    # create modulefile
+    mkdir -p $modulefiles_os_root/python
+    cat << EOM > $modulefiles_os_root/python/$py_ver
+#%Module
+prepend-path PATH $opt_root/$os/python/$py_ver/env/default/bin
+prepend-path LD_LIBRARY_PATH $opt_root/$os/python/$py_ver/env/default/lib
+prepend-path LD_LIBRARY_PATH $opt_root/$os/python/$py_ver/lib
+prepend-path CPATH $incl_dir
+EOM
+fi
+
+if ((PYTHON_PACKAGES == 1)); then
+    log_progress "PYTHON_PACKAGES"
+   # # install pure-so cheetah sources and libs
+   #  cp "$script_dir/tools/dongles/cheetah-api-linux-x86_64-v3.40.tar.gz" $tmp
+   #  cd $tmp
+   #  tar -xzf cheetah-api-linux-x86_64-v3.40.tar.gz
+   #  
+   #  # install pre-built cheetah Python module
+   #  # If run on its own (which=filter), we assume the user has loaded
+   #  # module load python before running the script. Let's make sure
+   #  sitep_dir=$(python3 -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
+   #  if [[ "$sitep_dir" == *"$opt_root"* ]]; then
+   #      echo "Installing cheetah API for Python"
+   #      cp $tmp/cheetah-api-linux-x86_64-v3.40/python/cheetah_py.py $sitep_dir
+   #      cp $tmp/cheetah-api-linux-x86_64-v3.40/c/cheetah.so $sitep_dir
+   #  else
+   #      >&2 echo "Your current Python does not seem to match any sicoe env Python installation"
+   #      >&2 echo "which python reports -> $(which python)"
+   #      >&2 echo "site-packages would be -> $sitep_dir"
+   #      >&2 echo "opt_root is -> $opt_root"
+   #      >&2 echo "Please use module load python/x.y.z and re-run"
+   #      exit 1
+   #  fi
+         
+    # upgrade pip
+    pip3 install --upgrade pip
+
+    # install packages
+    pip3 install setuptools==78.1.0
+    pip3 install pandas
+    pip3 install seaborn
+    pip3 install pycryptodome
+    pip3 install sip
+    pip3 install PyQt5==5.13.1
+    pip3 install QScintilla==2.11.2
+    pip3 install ftd2xx
+    pip3 install pyinstaller
+    pip3 install ipython==9.1.0
+    pip3 install prettytable
+    pip3 install plotext
+    pip3 install grapheme
+    pip3 install python-pptx
+    pip3 install python-docx
+    pip3 install docx
+    pip3 install pyflakes
+    pip3 install alive_progress
+    pip3 install bitstring==4.3.1
+    pip3 install tqdm==4.67.1
+    pip3 install dataframe-image
+    pip3 install pytest
+    pip3 install pytest-progress
+    pip3 install compiledb
+    pip3 install python-lsp-server
+    pip3 install build
+    pip3 install wheel
+    pip3 install toml
+    pip3 install icecream
+    pip3 install distro
+    pip3 install paramiko
+    pip3 install scp
+fi
+
+py37_pfx=$opt_root/$os/python/3.7.4
+if (( PYTHON37 == 1 )); then
+    log_progress "PYTHON37"
+    py37_pfx=$opt_root/$os/python/3.7.4
+    DONGLES_PY37=1
+    cd $tmp
+    # download python 3.7.4, unzip, cd into directory
+    wget https://www.python.org/ftp/python/3.7.4/Python-3.7.4.tgz
+    echo "Extracting tgz ..."
+    tar zxf Python-3.7.4.tgz
+    cd Python-3.7.4
+
+    # build and install Python
+    ./configure --enable-shared --prefix=$py37_pfx
+    make install
+
+    # create virtual environment
+    cd $py37_pfx
+    export LD_LIBRARY_PATH=$PWD/lib:$LD_LIBRARY_PATH
+    ./bin/python3 -m venv env/default
+
+    # make sure virtual environment is in your path
+    cd ~
+    export PATH=$py37_pfx/env/default/bin:${PATH}
+
+    # create modulefile
+    mkdir -p $modulefiles_os_root/python
+    cat << EOM > $modulefiles_os_root/python/3.7.4
+#%Module
+prepend-path PATH $opt_root/$os/python/3.7.4/env/default/bin
+prepend-path LD_LIBRARY_PATH $opt_root/$os/python/3.7.4/env/default/lib
+prepend-path LD_LIBRARY_PATH $opt_root/$os/python/3.7.4/lib
+prepend-path CPATH $opt_root/$os/python/3.7.4/include/python3.7m
+EOM
+    cat << EOM > $modulefiles_os_root/python/.version
+#%Module
+set ModulesVersion "3.7.4"
+EOM
+
+    # upgrade pip
+    pip3 install --upgrade pip
+
+    # install packages
+    pip3 install setuptools==68.0.0
+    pip3 install pandas
+    pip3 install seaborn
+    pip3 install pycrypto
+    pip3 install sip
+    pip3 install PyQt5==5.13.1
+    pip3 install QScintilla==2.11.2
+    pip3 install ftd2xx
+    pip3 install pyinstaller==5.6.2
+    pip3 install ipython==7.34.0
+    pip3 install prettytable
+    pip3 install plotext
+    pip3 install grapheme
+    pip3 install python-pptx
+    pip3 install python-docx
+    pip3 install docx
+    pip3 install pyflakes
+    pip3 install alive_progress
+    pip3 install bitstring==3.1.9
+    pip3 install tqdm==4.64.1
+    pip3 install dataframe-image
+    pip3 install pytest
+    pip3 install pytest-progress
+    pip3 install compiledb
+    pip3 install python-lsp-server
+    pip3 install build
+    pip3 install wheel
+    pip3 install toml
+    pip3 install icecream
+fi
+
+
+if (( CFG_FILE == 1 )); then
+    log_progress "CFG_FILE"
+    # populate config file to be sourced
+    cat << EOM > $config_file
+# Make sure we don't step into each other
+umask 002
+
+# Detect OS
+os_rel=\$(cat /etc/os-release)
+if [[ \$os_rel =~ 'NAME="Ubuntu"' && \$os_rel =~ 'VERSION_ID="20.04"' ]]; then
+    os=ubu20
+elif [[ \$os_rel =~ 'NAME="Ubuntu"' && \$os_rel =~ 'VERSION_ID="22.04"' ]]; then
+    os=ubu22
+elif [[ \$os_rel =~ 'NAME="Ubuntu"' && \$os_rel =~ 'VERSION_ID="24.04"' ]]; then
+    os=ubu24
+elif [[ \$os_rel =~ 'NAME="SLES"' && \$os_rel =~ 'VERSION_ID="12.5"' ]]; then
+    os=suse12
+elif [[ \$os_rel =~ 'NAME="SLES"' && \$os_rel =~ 'VERSION_ID="15.4"' ]]; then
+    os=suse15
+elif [[ \$os_rel =~ 'NAME="Rocky Linux"' && \$os_rel =~ 'VERSION_ID="8' ]]; then
+    os=rocky8
+elif [[ \$os_rel =~ 'NAME="Red Hat Enterprise Linux"' && \$os_rel =~ 'VERSION_ID="8.4"' ]]; then
+    os=rhl8
+else
+    echo "Could not configure SBRUF env: Unknown OS!"
+fi
+
+# The following is needed by module load sstdev
+export SICOE_ROOT_DIR=$root
+export SICOE_TOOLS_DIR=$root/opt/\$os
+export SICOE_PROJ_DIR=$root/proj/
+
+# The following needed by end users to run sbruf env -s and -p 
+export SBRUF_ROOT_DIR=$root/opt/common/sbruf
+export SBRUF_BUILD_PUBLISHED_DIR=$root/opt/\$os/sicoe/published
+export SBRUF_BUILD_SHARED_DIR=$root/opt/\$os/sicoe/shared
+export SBRUF_DEPLOY_DIR=/opt/sicoe/deployed
+export SBRUF_DEPLOY_HOST_FILE=\$SBRUF_ROOT_DIR/deploy_hosts.txt
+export SBRUF_TARGET_AUDIENCE=enduser
+
+# The following used by sbruf-deploy (and potentially other scripts)
+export SBRUF_TMP_DIR=\$HOME/.sicoe/tmp
+mkdir -p \$SBRUF_TMP_DIR
+
+# The following used by sbruf-release
+export SBRUF_RELEASE_DIR=\$SICOE_PROJ_DIR/stellar/release
+mkdir -p \$SBRUF_RELEASE_DIR
+
+# The following needed by end users to run tools such as coaster or gmebm
+export SBRUF_SOCKET_DIR=\$HOME/.sicoe/sockets
+mkdir -p \$SBRUF_SOCKET_DIR
+
+# The following used by coastest to put regression logs
+export SBRUF_REGR_RES_DIR=\$SICOE_PROJ_DIR/stellar/regr/\$USER
+mkdir -p \$SBRUF_REGR_RES_DIR
+
+# Add sbruf bash function to environment
+sbruf ()
+{
+    if [[ \$1 == env ]]; then
+        eval "\$(\$SBRUF_ROOT_DIR/sbruf \$@)" 2>&1
+    else
+        \$SBRUF_ROOT_DIR/sbruf \$@
+    fi
+    status=\$?
+    if [[ \$status != 0 ]]; then
+        >&2 printf "\\033[0;31m ** ERROR detected in sbruf **\\033[0m\n"
+    fi
+    return \$status
+}
+# make function available to scripts
+export -f sbruf
+
+# Export var containing this machine's os name as used by SBRUF config tools
+export SBRUF_OS=\$os
+
+# Configure the appropriate modulefiles (based on detected OS)
+source $opt_root/\$os/modules/init/profile.sh
+export MODULEPATH=$modulefiles_root/\$os:\${MODULEPATH}
+
+export MODULES_REDIRECT_OUTPUT=1
+# Add Python to the path so that end users can run coaster
+# (arc shell will remove python from path causing havoc. This is fixed by unload + load)
+module unload python
+module load python
+EOM
+fi
+
+# source config file so that module command is available to this script
+echo "Sourcing sbruf config file ($config_file)"
+source $config_file
+echo "Done sourcing sbruf config file"
+
+# Create directory tree
+mkdir -p $SICOE_TOOLS_DIR
+mkdir -p $SICOE_PROJ_DIR
+mkdir -p $SICOE_PROJ_DIR/usr/
+mkdir -p $SBRUF_ROOT_DIR
+mkdir -p $SBRUF_BUILD_PUBLISHED_DIR
+mkdir -p $SBRUF_BUILD_SHARED_DIR
+
+rustup_home=$opt_root/$os/rust/rustup
+cargo_home=$opt_root/$os/rust/cargo
+if (( RUSTUP == 1 )); then
+    log_progress "RUSTUP"
+    # install rustup
+    export RUSTUP_HOME=$rustup_home
+    export CARGO_HOME=$cargo_home
+    cd $tmp && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup-init
+    chmod +x rustup-init
+    ./rustup-init -y --no-modify-path --profile default --default-toolchain stable
+
+    # create modulefile
+    mkdir -p $modulefiles_os_root/rust/
+    rust_modulefile=$modulefiles_os_root/rust/latest
+    cat << EOM > $rust_modulefile
+#%Module
+prepend-path PATH $cargo_home/bin
+setenv RUSTUP_HOME $rustup_home
+setenv CARGO_HOME $cargo_home
+EOM
+fi
+
+if (( RUST_APPS == 1 )); then
+    module load rust
+
+    log_progress "RUST_APPS: exa"
+    mkdir -p $opt_root/$os/exa/
+    cargo install exa
+    mv $cargo_home/bin/exa $opt_root/$os/exa
+    mkdir -p $modulefiles_os_root/exa
+    cat << EOM > $modulefiles_os_root/exa/latest
+#%Module
+prepend-path PATH $opt_root/$os/exa
+EOM
+
+    log_progress "RUST_APPS: bat"
+    mkdir -p $opt_root/$os/bat/
+    cargo install bat
+    mv $cargo_home/bin/bat $opt_root/$os/bat/
+    mkdir -p $modulefiles_os_root/bat
+    cat << EOM > $modulefiles_os_root/bat/latest
+#%Module
+prepend-path PATH $opt_root/$os/bat
+EOM
+
+    log_progress "RUST_APPS: btm"
+    mkdir -p $opt_root/$os/btm/
+    cargo install bottom
+    mv $cargo_home/bin/btm $opt_root/$os/btm
+    mkdir -p $modulefiles_os_root/btm
+    cat << EOM > $modulefiles_os_root/btm/latest
+#%Module
+prepend-path PATH $opt_root/$os/btm
+EOM
+
+    log_progress "RUST_APPS: fd"
+    mkdir -p $opt_root/$os/fd/
+    cargo install fd-find
+    mv $cargo_home/bin/fd $opt_root/$os/fd
+    mkdir -p $modulefiles_os_root/fd
+    cat << EOM > $modulefiles_os_root/fd/latest
+#%Module
+prepend-path PATH $opt_root/$os/fd
+EOM
+
+    log_progress "RUST_APPS: delta"
+    mkdir -p $opt_root/$os/delta/
+    cargo install git-delta
+    mv $cargo_home/bin/delta $opt_root/$os/delta
+    mkdir -p $modulefiles_os_root/delta
+    cat << EOM > $modulefiles_os_root/delta/latest
+#%Module
+prepend-path PATH $opt_root/$os/delta
+EOM
+
+    log_progress "RUST_APPS: zoxide"
+    mkdir -p $opt_root/$os/zoxide/
+    cargo install zoxide
+    mv $cargo_home/bin/zoxide $opt_root/$os/zoxide
+    mkdir -p $modulefiles_os_root/zoxide
+    # create tmp script that can be sourced by modulefile
+    $opt_root/$os/zoxide/zoxide init --cmd j bash > $modulefiles_os_root/zoxide/zoxide_init_bash.sh
+    cat << EOM > $modulefiles_os_root/zoxide/latest
+#%Module
+prepend-path PATH $opt_root/$os/zoxide
+if { [ module-info mode load ] } {
+    puts stderr "Please source $modulefiles_os_root/zoxide/zoxide_init_bash.sh"
+}
+EOM
+
+    log_progress "RUST_APPS: ripgrep"
+    mkdir -p $opt_root/$os/ripgrep/
+    cargo install ripgrep
+    mv $cargo_home/bin/rg $opt_root/$os/ripgrep/
+    mkdir -p $modulefiles_os_root/ripgrep
+    cat << EOM > $modulefiles_os_root/ripgrep/latest
+#%Module
+prepend-path PATH $opt_root/$os/ripgrep
+EOM
+
+    log_progress "RUST_APPS: dust"
+    mkdir -p $opt_root/$os/dust/
+    cargo install du-dust
+    mv $cargo_home/bin/dust $opt_root/$os/dust
+    mkdir -p $modulefiles_os_root/dust
+    cat << EOM > $modulefiles_os_root/dust/latest
+#%Module
+prepend-path PATH $opt_root/$os/dust
+EOM
+
+    log_progress "RUST_APPS: sd"
+    mkdir -p $opt_root/$os/sd/
+    cargo install sd
+    mv $cargo_home/bin/sd $opt_root/$os/sd
+    mkdir -p $modulefiles_os_root/sd
+    cat << EOM > $modulefiles_os_root/sd/latest
+#%Module
+prepend-path PATH $opt_root/$os/sd
+EOM
+
+    log_progress "RUST_APPS: ytop"
+    mkdir -p $opt_root/$os/ytop/
+    cargo install ytop
+    mv $cargo_home/bin/ytop $opt_root/$os/ytop
+    mkdir -p $modulefiles_os_root/ytop
+    cat << EOM > $modulefiles_os_root/ytop/latest
+#%Module
+prepend-path PATH $opt_root/$os/ytop
+EOM
+
+    log_progress "RUST_APPS: tealdeer"
+    mkdir -p $opt_root/$os/tealdeer/
+    cargo install tealdeer
+    mv $cargo_home/bin/tldr $opt_root/$os/tealdeer/
+    mkdir -p $modulefiles_os_root/tealdeer
+    cat << EOM > $modulefiles_os_root/tealdeer/latest
+#%Module
+prepend-path PATH $opt_root/$os/tealdeer
+EOM
+
+    log_progress "RUST_APPS: viu"
+    mkdir -p $opt_root/$os/viu/
+    cargo install viu
+    mv $cargo_home/bin/viu $opt_root/$os/viu
+    mkdir -p $modulefiles_os_root/viu
+    cat << EOM > $modulefiles_os_root/viu/latest
+#%Module
+prepend-path PATH $opt_root/$os/viu
+EOM
+
+    log_progress "RUST_APPS: procs"
+    mkdir -p $opt_root/$os/procs/
+    cargo install procs
+    mv $cargo_home/bin/procs $opt_root/$os/procs
+    mkdir -p $modulefiles_os_root/procs
+    cat << EOM > $modulefiles_os_root/procs/latest
+#%Module
+prepend-path PATH $opt_root/$os/procs
+EOM
+
+    log_progress "RUST_APPS: hyperfine"
+    mkdir -p $opt_root/$os/hyperfine/
+    cargo install hyperfine
+    mv $cargo_home/bin/hyperfine $opt_root/$os/hyperfine
+    mkdir -p $modulefiles_os_root/hyperfine
+    cat << EOM > $modulefiles_os_root/hyperfine/latest
+#%Module
+prepend-path PATH $opt_root/$os/hyperfine
+EOM
+
+    log_progress "RUST_APPS: starship"
+    cd $tmp
+    curl -sS https://starship.rs/install.sh > starship-init
+    chmod u+x ./starship-init
+    mkdir -p $opt_root/$os/starship/
+    ./starship-init -y --bin-dir=$opt_root/$os/starship/
+    mkdir -p $modulefiles_os_root/starship
+    # create tmp script that can be sourced by modulefile
+    $opt_root/$os/starship/starship init bash > $modulefiles_os_root/starship/starship_init.sh
+    cat << EOM > $modulefiles_os_root/starship/latest
+#%Module
+prepend-path PATH $opt_root/$os/starship
+if { [ module-info mode load ] } {
+    puts stderr "Please source $modulefiles_os_root/starship/starship_init.sh"
+}
+EOM
+fi
+
+if (( MDBOOK == 1 )); then
+    log_progress "MDBOOK"
+    module load rust
+    mkdir -p $opt_root/$os/mdbook/
+    cargo install mdbook
+    mv $cargo_home/bin/mdbook $opt_root/$os/mdbook/
+    mkdir -p $modulefiles_os_root/mdbook
+    cat << EOM > $modulefiles_os_root/mdbook/latest
+#%Module
+prepend-path PATH $opt_root/$os/mdbook
+EOM
+fi
+
+# individual users will have to module load nnn then call "getplug" once to install plugins
+if (( NNN == 1 )); then
+    log_progress "NNN"
+    cd $tmp
+    wget https://github.com/jarun/nnn/releases/download/v4.5/nnn-v4.5.tar.gz
+    tar -xf nnn-v4.5.tar.gz
+    cd nnn-4.5
+    make O_NERD=1
+    mkdir -p $opt_root/$os/nnn/4.5
+    make install PREFIX=$opt_root/$os/nnn/4.5
+    mkdir -p $opt_root/$os/nnn/4.5/misc
+    mv misc/auto-completion $opt_root/$os/nnn/4.5/misc/
+    curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs > $opt_root/$os/nnn/4.5/bin/getplugs
+    chmod +x $opt_root/$os/nnn/4.5/bin/getplugs
+    mkdir -p $modulefiles_os_root/nnn
+    cat << EOM > $modulefiles_os_root/nnn/4.5
+#%Module
+prepend-path PATH $opt_root/$os/nnn/4.5/bin
+prepend-path MANPATH $opt_root/$os/nnn/4.5/share/man
+if { [ module-info mode load ] } {
+    puts stderr "Please source $opt_root/$os/nnn/4.5/misc/auto-completion/bash/nnn-completion.bash"
+}
+EOM
+fi
+
+# Vim requires Python so keep it here
+if (( VIM == 1 )); then
+    log_progress "VIM"
+    cd $tmp
+    git clone https://github.com/vim/vim.git
+    cd vim
+    git checkout v9.1.1336
+    mkdir -p $opt_root/$os/vim/9.1
+    module load python 
+    inc_path=$(python3 -c "import sysconfig; print(sysconfig.get_paths()['include'])")
+    CPATH=$inc_path ./configure --prefix=$opt_root/$os/vim/9.1 \
+        --enable-python3interp=dynamic \
+        --enable-luainterp=yes
+    CPATH=$inc_path make
+    make install
+
+    mkdir -p $modulefiles_os_root/vim
+    cat << EOM > $modulefiles_os_root/vim/9.1
+#%Module
+prepend-path PATH $opt_root/$os/vim/9.1/bin
+prepend-path MANPATH $opt_root/$os/vim/9.1/share/man
+EOM
+fi
+
+if (( NEOVIM == 1 )); then
+    log_progress "NEOVIM"
+    cd $tmp
+    git clone https://github.com/neovim/neovim.git
+    cd neovim
+    git checkout stable
+    
+    tags=$(git tag --points-at HEAD)
+    for tag in $tags; do
+        if [[ $tag =~ v([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+            nvim_ver=${BASH_REMATCH[1]}
+            break;
+        fi
+    done
+    if [[ -z $nvim_ver ]]; then
+        >&2 echo "ERROR: could not retrieve neovim version tag (found: $tags)"
+        exit 1
+    fi
+
+    echo "Will install NEOVIM version: $nvim_ver"
+
+    mkdir -p $opt_root/$os/neovim/$nvim_ver
+    make CMAKE_INSTALL_PREFIX=$opt_root/$os/neovim/$nvim_ver CMAKE_BUILD_TYPE=Release
+    make install
+
+    mkdir -p $modulefiles_os_root/neovim
+    cat << EOM > $modulefiles_os_root/neovim/$nvim_ver
+#%Module
+prepend-path PATH $opt_root/$os/neovim/$nvim_ver/bin
+prepend-path MANPATH $opt_root/$os/neovim/$nvim_ver/share/man
+EOM
+fi
+
+if (( FZF == 1 )); then
+    log_progress "FZF"
+    fzf_parent_dir=$opt_root/$os
+    cd $fzf_parent_dir
+    rm -rf ./fzf
+    git clone --depth 1 https://github.com/junegunn/fzf.git
+    cd fzf
+    XDG_CONFIG_HOME=$fzf_parent_dir ./install --xdg --completion --key-bindings --no-update-rc
+    mkdir -p $modulefiles_os_root/fzf
+    cat << EOM > $modulefiles_os_root/fzf/latest
+#%Module
+prepend-path PATH $fzf_parent_dir/fzf/bin
+if { [ module-info mode load ] } {
+    puts stderr "Please source $fzf_parent_dir/fzf/shell/completion.bash"
+    puts stderr "Please source $fzf_parent_dir/fzf/shell/key-bindings.bash"
+}
+EOM
+fi
+
+if (( COPILOT_CLI == 1 )); then
+    log_progress "COPILOT_CLI"
+    copilot_cli_version=1.0.2
+    build_dir=$tmp/copilot_cli
+    rm -rf $build_dir && mkdir $build_dir
+    cd $build_dir
+    wget https://github.com/github/copilot-cli/releases/download/v${copilot_cli_version}/copilot-linux-x64.tar.gz
+    tar -xzf copilot-linux-x64.tar.gz
+
+    install_dir=$opt_root/$os/copilot_cli/$copilot_cli_version/bin
+    rm -rf $install_dir && mkdir -p $install_dir
+    mv copilot $install_dir/
+
+    mkdir -p $modulefiles_os_root/copilot_cli
+    cat << EOM > $modulefiles_os_root/copilot_cli/$copilot_cli_version
+#%Module
+prepend-path PATH $install_dir
+EOM
+fi
+
+
+if (( DONGLES == 1 )); then
+    log_progress "DONGLES"
+    dongle_root=$opt_root/$os/dongles
+    mkdir -pv $dongle_root
+
+    # install pci header and lib (for this os)
+    cp "$script_dir/tools/dongles/pci.$os.tar.gz" $tmp
+    cd $tmp
+    tar -zxvf pci.$os.tar.gz
+    cp -rf pci $dongle_root/
+
+    # install pure-so cheetah sources and libs
+    cp "$script_dir/tools/dongles/cheetah-api-linux-x86_64-v3.40.tar.gz" $tmp
+    cd $tmp
+    tar -xzvf cheetah-api-linux-x86_64-v3.40.tar.gz
+    mkdir -p $dongle_root/cheetah/
+    cp -rf cheetah-api-linux-x86_64-v3.40 $dongle_root/cheetah/3.40
+    cd $dongle_root/cheetah
+    ln -sf 3.40 current
+
+    # install pre-built cheetah Python module
+    # If run on its own (which=filter), we assume the user has loaded
+    # module load python before running the script. Let's make sure
+    sitep_dir=$(python3 -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")
+    if [[ "$sitep_dir" == *"$opt_root"* ]]; then
+        echo "Installing cheetah API for Python"
+        cp $tmp/cheetah-api-linux-x86_64-v3.40/python/cheetah_py.py $sitep_dir
+        cp $tmp/cheetah-api-linux-x86_64-v3.40/c/cheetah.so $sitep_dir
+    else
+        >&2 echo "Your current Python does not seem to match any sicoe env Python installation"
+        >&2 echo "which python reports -> $(which python)"
+        >&2 echo "site-packages would be -> $sitep_dir"
+        >&2 echo "opt_root is -> $opt_root"
+        >&2 echo "Please use module load python/x.y.z and re-run"
+        exit 1
+    fi
+
+    # cleanup
+    rm -rf $tmp/cheetah-api-linux-x86_64*
+
+    # install ftdi libs
+    cp $script_dir/tools/dongles/ftdi_1.4.8.tar.gz $tmp/
+    cd $tmp
+    tar -xzvf ftdi_1.4.8.tar.gz
+    mkdir -p $dongle_root/ftdi/
+    cp -rf ftdi_1.4.8 $dongle_root/ftdi/1.4.8
+    cd $dongle_root/ftdi
+    ln -sf 1.4.8 current
+
+    # install pre-built sub-20 library
+    cp $script_dir/tools/dongles/sub20.tar.gz $tmp/
+    cd $tmp
+    tar -xvf sub20.tar.gz
+    cp -rf sub20 $dongle_root
+
+    # -- libusb -- #
+    cp $script_dir/tools/libusb-1.0.tar.gz $tmp
+    cd $tmp
+    tar -xzvf libusb-1.0.tar.gz
+    cp -rf libusb-1.0 $dongle_root
+    rm -f $tmp/libusb-1.0.tar.gz
+
+fi
+
+if (( LSUIO == 1 )); then
+    log_progress "LSUIO"
+    install_dir=$opt_root/$os/lsuio/0.2.0
+
+    # Download and extract code
+    cd $tmp
+    curl https://www.osadl.org/uploads/media/lsuio-0.2.0.tar.gz --output lsuio-0.2.0.tar.gz
+    tar -xvf lsuio-0.2.0.tar.gz
+    cd lsuio-0.2.0
+
+    # Build and install
+    ./configure --prefix=$install_dir
+    make
+    mkdir -p $install_dir
+    make install
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/lsuio
+    cat << EOM > $modulefiles_os_root/lsuio/0.2.0
+#%Module
+prepend-path PATH $install_dir/bin
+prepend-path MANPATH $install_dir/share/man
+EOM
+fi
+
+if (( CTAGS == 1 )); then
+    log_progress "CTAGS"
+    install_dir=$opt_root/$os/exuberant_ctags/5.8
+
+    # Download and extract code
+    cd $tmp
+    curl -L http://prdownloads.sourceforge.net/ctags/ctags-5.8.tar.gz --output ctags-5.8.tar.gz 
+    tar -xvf ctags-5.8.tar.gz 
+    cd ctags-5.8
+
+    # Build and install
+    ./configure --prefix=$install_dir
+    make
+    make install
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/ctags
+    cat << EOM > $modulefiles_os_root/ctags/5.8
+#%Module
+prepend-path PATH $install_dir/bin
+prepend-path MANPATH $install_dir/share/man
+EOM
+fi
+
+if (( TAR == 1 )); then
+   log_progress "TAR"
+   install_dir=$opt_root/$os/tar/1.3.0
+
+    # Download and extract code
+    cd $tmp
+    curl -L https://ftp.gnu.org/gnu/tar/tar-1.30.tar.gz --output tar-1.30.tar.gz 
+    tar -xvf tar-1.30.tar.gz 
+    cd tar-1.30
+
+    # Build and install
+    ./configure --prefix=$install_dir
+    make
+    make install
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/tar
+    cat << EOM > $modulefiles_os_root/tar/1.3.0
+#%Module
+prepend-path PATH $install_dir/bin
+prepend-path MANPATH $install_dir/share/man
+EOM
+fi
+
+if (( TIG == 1 )); then
+   log_progress "TIG"
+   install_dir=$opt_root/$os/tig/2.5.12
+
+    # Download and extract code
+    cd $tmp
+    wget https://github.com/jonas/tig/releases/download/tig-2.5.12/tig-2.5.12.tar.gz
+    tar -xzf tig-2.5.12.tar.gz
+    cd tig-2.5.12
+    make prefix=$install_dir
+    make install prefix=$install_dir
+    set +e
+    install_docs=$(which asciidoc 2> /dev/null)
+    set -e
+    if [[ -n $install_docs ]]; then
+        make install-doc prefix=$install_dir
+    fi
+    # Create module file
+    mkdir -pv $modulefiles_os_root/tig
+    cat << EOM > $modulefiles_os_root/tig/2.5.12
+#%Module
+prepend-path PATH $install_dir/bin
+prepend-path MANPATH $install_dir/share/man
+EOM
+fi
+
+if (( GLOW == 1 )); then
+    log_progress "GLOW"
+    glow_version=2.1.1
+    build_dir=$tmp/glow
+    rm -rf $build_dir && mkdir $build_dir
+    cd $build_dir
+    wget https://github.com/charmbracelet/glow/releases/download/v${glow_version}/glow_${glow_version}_Linux_x86_64.tar.gz
+    tar -xzf glow_${glow_version}_Linux_x86_64.tar.gz
+
+    install_dir=$opt_root/$os/glow/$glow_version
+    mkdir -p $install_dir/bin $install_dir/share/man/man1
+    mv glow_${glow_version}_Linux_x86_64/glow $install_dir/bin/
+    mv glow_${glow_version}_Linux_x86_64/manpages/*.1 $install_dir/share/man/man1/ 2>/dev/null || true
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/glow
+    cat << EOM > $modulefiles_os_root/glow/$glow_version
+#%Module
+prepend-path PATH $install_dir/bin
+prepend-path MANPATH $install_dir/share/man
+EOM
+fi
+
+if (( DOXYGEN == 1 )); then
+    log_progress "DOXYGEN"
+    # Download and extract pre-built binaries
+    build_dir=$tmp/doxygen
+    rm -rf $build_dir && mkdir $build_dir
+    cd $build_dir
+    wget https://sourceforge.net/projects/doxygen/files/rel-1.8.17/doxygen-1.8.17.linux.bin.tar.gz/download \
+         -O doxygen-1.8.17.linux.bin.tar.gz
+    tar -zxvf doxygen-1.8.17.linux.bin.tar.gz
+
+    # Install
+    install_dir=$opt_root/$os/doxygen/1.8.17
+    rm -rf $install_dir && mkdir -p $install_dir
+    mv -v $build_dir/doxygen-1.8.17/* $install_dir/
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/doxygen
+    cat << EOM > $modulefiles_os_root/doxygen/1.8.17
+#%Module
+prepend-path PATH $install_dir/bin
+EOM
+fi
+
+if (( TEXLIVE == 1 )); then
+    log_progress "TEXLIVE"
+    # Download and extract pre-built binaries
+    cd $tmp
+    if (( TEXLIVE_LOCAL == 0 )); then 
+        echo "Fetch TexLive ISO image (this will take several minutes)"
+        wget https://mirror.las.iastate.edu/tex-archive/systems/texlive/Images/texlive.iso
+    fi
+
+    echo "Mounting TexLive ISO" 
+    sudo mkdir -p /mnt/texlive
+    sudo mount -t iso9660 -o ro,loop,noauto ./texlive.iso /mnt/texlive
+    cd /mnt/texlive
+    set +e
+
+    echo "Installing texlive packages (full installation)"
+    # Use release date as version, grab it from last line of release notes
+    texlive_version=$(tail -1 /mnt/texlive/release-texlive.txt | grep -oP '\d{8}')
+    install_dir=$opt_root/$os/texlive/$texlive_version
+    perl ./install-tl --paper=letter --texdir=$install_dir --no-interaction
+    if [[ $? != 0 ]]; then
+        texlive_failed=
+    fi
+
+    echo "Un-mounting TexLive ISO" 
+    sudo umount /mnt/texlive
+    sudo rmdir /mnt/texlive
+    if [[ -n $texlive_failed ]]; then
+        printf "${RED}Texlive installation failed\n${NOCOLOR}"
+        exit 1
+    fi
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/texlive
+    cat << EOM > $modulefiles_os_root/texlive/$texlive_version
+#%Module
+prepend-path PATH $install_dir/bin/x86_64-linux
+EOM
+fi
+
+if (( GRAPHVIZ == 1 )); then
+    log_progress "GRAPHVIZ"
+    graphviz_ver=14.1.3
+    build_dir=$tmp/graphviz
+    rm -rf $build_dir && mkdir $build_dir
+    cd $build_dir
+    wget https://gitlab.com/graphviz/graphviz/-/archive/${graphviz_ver}/graphviz-${graphviz_ver}.tar.gz
+    tar -xzf graphviz-${graphviz_ver}.tar.gz
+    cd graphviz-${graphviz_ver}
+
+    # Build from source using cmake
+    # Requires libltdl-dev (e.g. sudo apt-get install libltdl-dev on Ubuntu,
+    # or libtool-ltdl-devel on RHEL/Rocky)
+    install_dir=$opt_root/$os/graphviz/$graphviz_ver
+    mkdir build && cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=$install_dir -DCMAKE_BUILD_TYPE=Release -DENABLE_LTDL=ON
+    if grep -q 'ENABLE_LTDL:BOOL=OFF' CMakeCache.txt; then
+        printf "${RED}ERROR: cmake could not find libltdl. Install libltdl-dev (Ubuntu) or libtool-ltdl-devel (RHEL/Rocky) and retry.${NOCOLOR}\n"
+        exit 1
+    fi
+    make -j$(nproc)
+    make install
+
+    # Register plugins
+    PATH=$install_dir/bin:$PATH LD_LIBRARY_PATH=$install_dir/lib:${LD_LIBRARY_PATH:-} dot -c
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/graphviz
+    cat << EOM > $modulefiles_os_root/graphviz/$graphviz_ver
+#%Module
+prepend-path PATH $install_dir/bin
+prepend-path LD_LIBRARY_PATH $install_dir/lib
+prepend-path MANPATH $install_dir/share/man
+prepend-path PKG_CONFIG_PATH $install_dir/lib/pkgconfig
+EOM
+fi
+
+if (( SEVENZIP == 1 )); then
+    log_progress "SEVENZIP"
+    # Extract pre-built binaries
+    build_dir=$tmp/7zip
+    rm -rf $build_dir && mkdir $build_dir
+    cd $build_dir
+    wget --no-check-certificate https://www.7-zip.org/a/7z2201-linux-x64.tar.xz
+    xz -d 7z2201-linux-x64.tar.xz
+    tar -xvf 7z2201-linux-x64.tar
+    rm -rf 7z2201-linux-x64.tar*
+
+    # Install
+    install_dir=$opt_root/$os/7zip/22.01
+    rm -rf $install_dir && mkdir -p $install_dir
+    mv -v $build_dir/* $install_dir/
+    # Create 7z symlink
+    cd $install_dir && ln -s 7zz 7z
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/7zip
+    cat << EOM > $modulefiles_os_root/7zip/22.01
+#%Module
+prepend-path PATH $install_dir
+EOM
+fi
+
+if [[ -z $keep_tmp ]]; then
+    echo "Cleaning up $tmp directory ..."
+    rm -rf $tmp
+fi
+
+printf "${GREEN}"
+echo "Opt environment was created for the $os OS."
+echo "Please add the following line to your bashrc:"
+echo "source $config_file"
+echo ""
+echo "Then close all open shells. From a new shell you can now use environment "
+echo "modules to manage your Stellar environment (module avail, module load etc.)"
+printf "${NOCOLOR}"

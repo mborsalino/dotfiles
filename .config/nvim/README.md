@@ -36,12 +36,24 @@ system entirely (set via a neovim `FileType` autocmd on the nnn buffer).
 
 ## Markdown Preview
 
-In-buffer markdown rendering via [render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim).
+Two complementary preview modes for markdown files.
+
+### In-buffer rendering
+
+[render-markdown.nvim](https://github.com/MeanderingProgrammer/render-markdown.nvim)
+styles headers, tables, checkboxes, and inline formatting directly in the
+buffer. Files open in raw source mode by default.
+
+### Floating glow preview
+
+[glow.nvim](https://github.com/ellisonleao/glow.nvim) opens a floating
+window with a fully rendered preview powered by the
+[glow](https://github.com/charmbracelet/glow) CLI. Press `q` or `<Esc>`
+to close the preview.
+
+### Keybindings
 
 | Key | Action | Mnemonic |
 |-----|--------|----------|
-| `<Leader>mr` | Toggle between rendered and raw source | **m**arkdown **r**ender |
-
-By default, markdown files open in raw source mode. Press `<Leader>mr` to
-toggle the rendered view, which styles headers, tables, checkboxes, and
-inline formatting directly in the buffer.
+| `<Leader>mr` | Toggle in-buffer rendered/raw source | **m**arkdown **r**ender |
+| `<Leader>mg` | Open floating glow preview | **m**arkdown **g**low |
