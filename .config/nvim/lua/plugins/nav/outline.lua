@@ -7,6 +7,9 @@ return {
     { "<leader>of", "<cmd>OutlineFocusOutline<CR>", desc = "Switch Focus to Outline Window" },
   },
   opts = {
-    -- Your setup opts here
+    -- Enable single-click to jump to symbol from outline window
+    keymaps = {
+      goto_location = { '<CR>', '<2-LeftMouse>' },
+    },
   },
 }
