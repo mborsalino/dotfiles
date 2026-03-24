@@ -80,8 +80,10 @@ return {
         }
         nnn.setup(cfg)
 
-        -- Ctrl+b (in nnn): cd nvim to nnn's current directory ("browse here")
-        -- Ctrl+g (in nnn): show nnn's current directory as notification ("get path")
+        -- Ctrl+b (in nnn): cd nvim to nnn's current directory
+        -- Mnemonic: browse here
+        -- Ctrl+d (in nnn): show nnn's current directory as notification
+        -- Mnemonic: directory
         vim.api.nvim_create_autocmd("FileType", {
             pattern = "nnn",
             callback = function()
@@ -90,7 +92,7 @@ return {
                     vim.cmd("startinsert")
                 end, { buffer = true })
 
-                vim.keymap.set("t", "<C-g>", function()
+                vim.keymap.set("t", "<C-d>", function()
                     local buf = vim.api.nvim_get_current_buf()
                     local chan = vim.bo[buf].channel
                     if chan and chan > 0 then
@@ -105,9 +107,9 @@ return {
             end,
         })
 
-        -- <Leader>ng: jump to the nnn pane from any window.
-        -- Mnemonic: nnn go
-        vim.keymap.set("n", "<Leader>ng", function()
+        -- <Leader>nf: focus the nnn pane from any window (opens it if closed).
+        -- Mnemonic: nnn focus
+        vim.keymap.set("n", "<Leader>nf", function()
             for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
                 local buf = vim.api.nvim_win_get_buf(win)
                 if vim.bo[buf].filetype == "nnn" then
@@ -118,14 +120,14 @@ return {
             end
             -- nnn not open — open it
             nnn.toggle("explorer")
-        end, { desc = "Focus nnn pane" })
+        end, { desc = "nnn: focus pane" })
 
-        -- <Leader>nf (in buffer): navigate nnn to current file's directory.
-        -- Mnemonic: nnn follow
+        -- <Leader>ns: navigate nnn to current file's directory.
+        -- Mnemonic: nnn sync
         -- Writes the target path to /tmp/nnn-goto then triggers the "nvimcd"
         -- plugin (;n) via chansend. The plugin reads the path and calls nnn_cd
         -- to navigate nnn in the current context.
-        vim.keymap.set("n", "<Leader>nf", function()
+        vim.keymap.set("n", "<Leader>ns", function()
             local dir = vim.fn.expand("%:p:h")
             if dir == "" then
                 vim.notify("Buffer has no file")
@@ -147,7 +149,7 @@ return {
             -- Trigger the nvimcd plugin: ; enters plugin mode, n selects it
             vim.fn.chansend(chan, ";n")
             vim.notify("nnn → " .. dir)
-        end, { desc = "nnn: follow current file" })
+        end, { desc = "nnn: sync to file dir" })
     end
 }
 

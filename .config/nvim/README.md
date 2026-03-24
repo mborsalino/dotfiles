@@ -9,11 +9,11 @@ Bidirectional directory sync between neovim and nnn via [nnn.nvim](https://githu
 | Key | Context | Action | Mnemonic |
 |-----|---------|--------|----------|
 | `<C-b>` | nnn terminal | cd neovim to nnn's current directory | **b**rowse here |
-| `<C-g>` | nnn terminal | show nnn's current directory as notification | **g**et path |
-| `<Leader>nf` | normal buffer | navigate nnn to current file's directory | **n**nn **f**ollow |
-| `<Leader>ng` | normal buffer | jump to nnn pane (opens it if closed) | **n**nn **g**o |
+| `<C-d>` | nnn terminal | show nnn's current directory as notification | **d**irectory |
+| `<Leader>nf` | normal buffer | focus nnn pane (opens it if closed) | **n**nn **f**ocus |
+| `<Leader>ns` | normal buffer | navigate nnn to current file's directory | **n**nn **s**ync |
 
-### How `<Leader>nf` works
+### How `<Leader>ns` works
 
 1. Neovim writes the current buffer's parent directory to `/tmp/nnn-goto`
 2. Sends `;n` to the nnn terminal via `chansend`, triggering the `nvimcd` plugin
