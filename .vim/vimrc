@@ -346,9 +346,6 @@ map ,cd :cd %:p:h<CR>
 
 nmap <F12> :call LocListToggle()<ESC>
 
-" NERDTree shortcuts
-cnoreabbrev ntf NERDTreeFocus
-cnoreabbrev ntt NERDTreeToggle
 
 " TagBar shortcuts
 nmap <Leader>tag :TagbarOpen jf<CR>
@@ -489,14 +486,6 @@ autocmd BufEnter * :syntax sync fromstart
 " Plugins
 "----------------------------------------------------------------------------------------------------------------------"
 
-" TagList
-" rely on ctags being in PATH
-let Tlist_Ctags_Cmd='ctags'
-" show tag drop down menu in GVIM
-let Tlist_Show_Menu = 1
-" default behavior is sort by name
-let Tlist_Sort_Type = 'name'
-
 " TagBar
 " rely on ctags being in PATH
 let tagbar_ctags_bin='ctags'
@@ -504,54 +493,8 @@ let g:tagbar_position = 'left'
 " Write rust tags upone saving file
 autocmd BufWritePost *.rs :silent! exec "!rusty-tags vi --quiet --start-dir=" . expand('%:p:h') . "&" | redraw!
 
-" EasyTag
-" let g:easytags_cmd = '/home/mborsalino/local/bin/ctags'
-" let g:easytags_file = '/home/mborsalino/.vimtagsdir'
-let g:easytags_auto_update = 0
-let g:easytags_always_enabled = 0
-" let g:easytags_by_filetype = '/home/mborsalino/.vimtagsdir'
-let g:easytags_auto_highlight = 0
 
-" air-line
-let g:airline_powerline_fonts = 1
-"
-" if !exists('g:airline_symbols')
-"     let g:airline_symbols = {}
-" endif
-" "
-"     " unicode symbols
-"     let g:airline_left_sep = '»'
-"     let g:airline_left_sep = '▶'
-"     let g:airline_right_sep = '«'
-"     let g:airline_right_sep = '◀'
-"     let g:airline_symbols.linenr = '␊'
-"     let g:airline_symbols.linenr = '␤'
-"     let g:airline_symbols.linenr = '¶'
-"     let g:airline_symbols.branch = '⎇'
-"     let g:airline_symbols.paste = 'ρ'
-"     let g:airline_symbols.paste = 'Þ'
-"     let g:airline_symbols.paste = '∥'
-"     let g:airline_symbols.whitespace = 'Ξ'
-" "
-"     " airline symbols
-"     let g:airline_left_sep = ''
-"     let g:airline_left_alt_sep = ''
-"     let g:airline_right_sep = ''
-"     let g:airline_right_alt_sep = ''
-"     let g:airline_symbols.branch = ''
-"     let g:airline_symbols.readonly = ''
-"     let g:airline_symbols.linenr = '☰'
-" "     let g:airline_symbols.linenr = ''
-" 
-"     " powerline symbols
-"     let g:airline_symbols.maxlinenr = ''
-"     let g:airline_symbols.dirty='⚡'
-" 
 
-" NERDTree
-" --------
-" Show bookmarks on top of file tree
-let NERDTreeShowBookmarks=1
 
 " Vimspector
 " ------------
@@ -617,10 +560,6 @@ else
 endif
 source $VIMHOME/jumplist_fzf.vim
 
-" MarkBar
-" ---------
-set viminfo+=!
-nmap <Leader>m <Plug>ToggleMarkbar
 
 " Zoxide
 " ------
