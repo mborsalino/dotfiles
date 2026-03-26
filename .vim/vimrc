@@ -652,43 +652,81 @@ nmap <Leader>sfc <Plug>CtrlSFCwordPath
 " ---------
 call quickui#menu#reset()
 
-call quickui#menu#install('&Symbol', [
-			\ [ "&Grep Word\t(In Project)", 'call MenuHelp_GrepCode()', 'Grep keyword in current project' ],
+call quickui#menu#install('&Navigate', [
+			\ [ "&Files\t\\ff", 'Files', 'FZF find files' ],
+			\ [ "Files by &Word\t\\fw", 'call fzf#vim#files("", {"options": ["--query", expand("<cword>")]})', 'FZF find file by word under cursor' ],
+			\ [ "&Buffers\t\\b", 'Buffers', 'Switch between open buffers' ],
+			\ [ "Buffer &Lines\t\\/", 'BLines', 'Search lines in current buffer' ],
+			\ [ "&Marks\t\\''", 'Marks', 'Jump to marks' ],
 			\ [ "--", ],
-			\ [ "Find &Definition\t(GNU Global)", 'call MenuHelp_Gscope("g")', 'GNU Global search g'],
-			\ [ "Find &Symbol\t(GNU Global)", 'call MenuHelp_Gscope("s")', 'GNU Gloal search s'],
-			\ [ "Find &Called by\t(GNU Global)", 'call MenuHelp_Gscope("d")', 'GNU Global search d'],
-			\ [ "Find C&alling\t(GNU Global)", 'call MenuHelp_Gscope("c")', 'GNU Global search c'],
-			\ [ "Find &From Ctags\t(GNU Global)", 'call MenuHelp_Gscope("z")', 'GNU Global search c'],
+			\ [ "&Outline Toggle\t\\oo", 'Outline', 'Toggle symbol outline sidebar' ],
+			\ [ "Outline &Focus\t\\of", 'OutlineFocusOutline', 'Focus the outline window' ],
+			\ [ "&Tagbar\t\\tag", 'TagbarOpen jf', 'Open tagbar and jump to it' ],
 			\ [ "--", ],
-			\ [ "Goto D&efinition\t(LSP)", 'Telescope lsp_definitions'],
-			\ [ "Goto &Implementation\t(LSP)", 'Telescope lsp_implementations'],
-			\ [ "Goto &References\t(LSP)", 'Telescope lsp_references'],
-			\ [ "Goto Callers\t(YCM)", 'YcmCompleter GoToCallers'],
-			\ [ "Get D&oc\t(YCM)", 'YcmCompleter GetDoc'],
-			\ [ "Get &Type\t(YCM)", 'YcmCompleter GetTypeImprecise'],
+			\ [ "&NNN Explorer\t\\nnn", 'NnnExplorer', 'Toggle nnn file explorer' ],
+			\ [ "NNN &Sync to File\t\\ns", 'exec "normal \\<Leader>ns"', 'Navigate nnn to current file dir' ],
+			\ [ "NNN &Focus\t\\nf", 'exec "normal \\<Leader>nf"', 'Focus nnn pane (open if closed)' ],
+			\ ])
+
+call quickui#menu#install('&LSP', [
+			\ [ "Goto &Definition\tgd", 'Telescope lsp_definitions', 'Jump to symbol definition' ],
+			\ [ "Goto D&eclaration\tgD", 'lua vim.lsp.buf.declaration()', 'Jump to symbol declaration' ],
+			\ [ "Goto &Implementation\tgi", 'Telescope lsp_implementations', 'Jump to implementation' ],
+			\ [ "Goto &References\tgR", 'Telescope lsp_references', 'Show all references' ],
+			\ [ "Goto &Type Definition\tgt", 'Telescope lsp_type_definitions', 'Jump to type definition' ],
+			\ [ "--", ],
+			\ [ "&Hover Documentation\t\\k", 'lua vim.lsp.buf.hover()', 'Show hover docs for symbol' ],
+			\ [ "Code &Actions\t\\ca", 'lua vim.lsp.buf.code_action()', 'Available code actions' ],
+			\ [ "&Rename Symbol\t\\rn", 'lua vim.lsp.buf.rename()', 'Rename symbol across project' ],
+			\ [ "--", ],
+			\ [ "&Buffer Diagnostics\t\\D", 'Telescope diagnostics bufnr=0', 'Show diagnostics for current buffer' ],
+			\ [ "&Line Diagnostics\t\\d", 'lua vim.diagnostic.open_float()', 'Show diagnostics for current line' ],
+			\ [ "&Next Diagnostic\t]d", 'lua vim.diagnostic.goto_next()', 'Jump to next diagnostic' ],
+			\ [ "&Prev Diagnostic\t[d", 'lua vim.diagnostic.goto_prev()', 'Jump to previous diagnostic' ],
+			\ [ "--", ],
+			\ [ "Restart L&SP\t\\rs", 'LspRestart', 'Restart LSP server' ],
+			\ ])
+
+call quickui#menu#install('&Search', [
+			\ [ "CtrlSF &Prompt\t\\sfp", 'call feedkeys("\<Plug>CtrlSFPrompt")', 'Open CtrlSF search prompt' ],
+			\ [ "CtrlSF &Word Under Cursor\t\\sfc", 'call feedkeys("\<Plug>CtrlSFCwordPath")', 'Search word under cursor with CtrlSF' ],
+			\ [ "CtrlSF &Toggle Results\t\\sft", 'CtrlSFToggle', 'Toggle CtrlSF results window' ],
+			\ [ "--", ],
+			\ [ "&Ripgrep\t:Rg", 'Rg', 'Search with ripgrep' ],
+			\ [ "&Commits\t\\gC", 'Commits', 'Search git commits' ],
+			\ ])
+
+call quickui#menu#install('&Git', [
+			\ [ "&Next Hunk\t\\hn", 'GitGutterNextHunk', 'Jump to next changed hunk' ],
+			\ [ "&Prev Hunk\t\\hp", 'GitGutterPrevHunk', 'Jump to previous changed hunk' ],
+			\ [ "Pre&view Hunk\t\\hv", 'GitGutterPreviewHunk', 'Preview hunk changes' ],
+			\ [ "--", ],
+			\ [ "&Undo Hunk", 'GitGutterUndoHunk', 'Revert hunk to git version' ],
+			\ [ "&Stage Hunk", 'GitGutterStageHunk', 'Stage hunk for commit' ],
+			\ ])
+
+call quickui#menu#install('&Fold', [
+			\ [ "Close &All\tzM", 'lua require("ufo").closeAllFolds()', 'Fold everything' ],
+			\ [ "Open A&ll\tzR", 'lua require("ufo").openAllFolds()', 'Unfold everything' ],
+			\ [ "&Toggle Under Cursor\tza", 'normal! za', 'Toggle fold at cursor' ],
+			\ [ "&Peek Fold\tzp", 'lua require("ufo").peekFoldedLinesUnderCursor()', 'Preview folded content' ],
+			\ [ "--", ],
+			\ [ "Open &One More Level\tzr", 'normal! zr', 'Open one more fold level globally' ],
+			\ [ "Close One &More Level\tzm", 'normal! zm', 'Close one more fold level globally' ],
 			\ ])
 
 let g:context_menu_k = [
-			\ ["&Peek Definition\tAlt+;", 'call quickui#tools#preview_tag("")'],
-			\ ["S&earch in Project\t\\cx", 'exec "silent! GrepCode! " . expand("<cword>")'],
+			\ [ "&Peek Definition\tgd", 'Telescope lsp_definitions', 'Jump to definition' ],
+			\ [ "Show &References\tgR", 'Telescope lsp_references', 'Show all references' ],
+			\ [ "&Hover Doc\t\\k", 'lua vim.lsp.buf.hover()', 'Show documentation' ],
 			\ [ "--", ],
-			\ [ "Find &Definition\t\\cg", 'call MenuHelp_Fscope("g")', 'GNU Global search g'],
-			\ [ "Find &Symbol\t\\cs", 'call MenuHelp_Fscope("s")', 'GNU Gloal search s'],
-			\ [ "Find &Called by\t\\cd", 'call MenuHelp_Fscope("d")', 'GNU Global search d'],
-			\ [ "Find C&alling\t\\cc", 'call MenuHelp_Fscope("c")', 'GNU Global search c'],
-			\ [ "Find &From Ctags\t\\cz", 'call MenuHelp_Fscope("z")', 'GNU Global search c'],
+			\ [ "&Search in Project\t\\sfc", 'call feedkeys("\<Plug>CtrlSFCwordPath")', 'CtrlSF search word under cursor' ],
+			\ [ "&Grep in Project\t:Rg", 'exec "Rg " . expand("<cword>")', 'Ripgrep word under cursor' ],
 			\ [ "--", ],
-			\ [ "Goto D&efinition\t(LSP)", 'Telescope lsp_definitions'],
-			\ [ "Goto &Implementation\t(LSP)", 'Telescope lsp_implementations'],
-			\ [ "Goto &References\t(LSP)", 'Telescope lsp_references'],
-			\ [ "Goto Callers\t(YCM)", 'YcmCompleter GoToCallers'],
-			\ [ "Get D&oc\t(YCM)", 'YcmCompleter GetDoc'],
-			\ [ "Get &Type\t(YCM)", 'YcmCompleter GetTypeImprecise'],
+			\ [ "Rename S&ymbol\t\\rn", 'lua vim.lsp.buf.rename()', 'Rename symbol' ],
+			\ [ "Code &Actions\t\\ca", 'lua vim.lsp.buf.code_action()', 'Code actions' ],
 			\ [ "--", ],
-			\ ['Dash &Help', 'call asclib#utils#dash_ft(&ft, expand("<cword>"))'],
-			\ ['Cpp&man', 'exec "Cppman " . expand("<cword>")', '', 'c,cpp'],
-			\ ['P&ython Doc', 'call quickui#tools#python_help("")', 'python'],
+			\ [ 'P&ython Doc', 'call quickui#tools#python_help("")', 'python' ],
 			\ ]
 
 
