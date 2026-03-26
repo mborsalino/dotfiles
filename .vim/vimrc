@@ -362,52 +362,66 @@ cnoreabbrev zo ZoomToggle
 
 " Smart pane resize — see lua block below
 lua << EOF
--- Smart pane resize: expand or shrink the current pane in the arrow direction.
+-- Smart pane resize: move the nearest border in the arrow direction.
 --
--- dir: one of "left", "right", "up", "down" — the direction of the resize.
+-- dir: one of "left", "right", "up", "down" — the direction to move a border.
 --
 -- winnr() returns the number (1-based index) of the currently focused window.
--- We use it to detect whether a wincmd jump actually moved us to a different
--- window. If winnr() is the same after the jump, there's no neighbor there.
+-- We use it to detect neighbors by jumping and checking if winnr changed.
 --
--- Behavior:
---   - If there's a neighbor in the requested direction, expand toward it.
---   - If not, but there's a neighbor in the opposite direction, shrink away from it.
---   - If no neighbor in either direction, notify the user.
+-- Key insight: `vertical resize +/-5` always moves the RIGHT border for
+-- non-rightmost windows, but the LEFT border for the rightmost window.
+-- Same for `resize` with top/bottom borders. So when the current pane is
+-- at the far edge (rightmost for h/l, bottommost for j/k), the resize
+-- sign must be inverted to keep the "move border in arrow direction" behavior.
+--
+-- Examples (3 vertical panes: A | B | C):
+--   B + Alt+h: move B's right border left  → vertical resize -5
+--   B + Alt+l: move B's right border right → vertical resize +5
+--   C + Alt+h: move C's left border left   → vertical resize +5 (inverted)
+--   C + Alt+l: move C's left border right  → vertical resize -5 (inverted)
 
 local function smart_resize(dir)
   local cur = vim.fn.winnr()
+  local wincmds = { left = "h", right = "l", up = "k", down = "j" }
 
-  -- Direction and its opposite
-  local wincmds  = { left = "h", right = "l", up = "k", down = "j" }
-  local opposite = { left = "right", right = "left", up = "down", down = "up" }
-
-  -- Resize commands: expand = grow current pane, shrink = shrink current pane
-  -- Direction only determines which neighbor to check, not the resize sign.
-  local is_vertical = (dir == "left" or dir == "right")
-  local expand_cmd = is_vertical and "vertical resize +5" or "resize +5"
-  local shrink_cmd = is_vertical and "vertical resize -5" or "resize -5"
-
-  -- Check if neighbor exists in the requested direction
+  -- Check for neighbors in both directions
   vim.cmd("wincmd " .. wincmds[dir])
-  if vim.fn.winnr() ~= cur then
-    -- Neighbor exists in this direction: expand toward it
-    vim.cmd(cur .. "wincmd w")
-    vim.cmd(expand_cmd)
+  local has_dir = vim.fn.winnr() ~= cur
+  if has_dir then vim.cmd(cur .. "wincmd w") end
+
+  local opposite_dir = ({ left = "right", right = "left", up = "down", down = "up" })[dir]
+  vim.cmd("wincmd " .. wincmds[opposite_dir])
+  local has_opp = vim.fn.winnr() ~= cur
+  if has_opp then vim.cmd(cur .. "wincmd w") end
+
+  if not has_dir and not has_opp then
+    vim.notify("Can't resize in this direction")
     return
   end
 
-  -- No neighbor in that direction; check the opposite side
-  vim.cmd("wincmd " .. wincmds[opposite[dir]])
-  if vim.fn.winnr() ~= cur then
-    -- Neighbor exists on opposite side: shrink current pane
-    vim.cmd(cur .. "wincmd w")
-    vim.cmd(shrink_cmd)
-    return
-  end
+  -- Base sign: left/up = shrink (-), right/down = grow (+)
+  local sign = (dir == "left" or dir == "up") and -1 or 1
 
-  -- No neighbor in either direction
-  vim.notify("Can't resize in this direction")
+  -- vim's resize always moves the RIGHT border (or BOTTOM for vertical).
+  -- Exception: the rightmost (or bottommost) window, where it moves the
+  -- LEFT (or TOP) border instead — effectively inverting the direction.
+  -- Detect this by checking for a neighbor in the "positive" direction
+  -- (right for horizontal, down for vertical).
+  local positive_dir = (dir == "left" or dir == "right") and "right" or "down"
+  local has_positive
+  if positive_dir == dir then
+    has_positive = has_dir
+  else
+    has_positive = has_opp
+  end
+  if not has_positive then sign = -sign end
+
+  local is_vertical = (dir == "left" or dir == "right")
+  local cmd = is_vertical
+    and ("vertical resize " .. (sign > 0 and "+5" or "-5"))
+    or  ("resize " .. (sign > 0 and "+5" or "-5"))
+  vim.cmd(cmd)
 end
 
 -- Bind Alt+Arrow and Alt+hjkl keys to smart resize
