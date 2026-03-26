@@ -578,7 +578,7 @@ nnoremap <silent> <Leader>R :Rooter<CR>
 
 " Gitgutter
 " ---------
-nmap <Leader>hn <Plug>(GitGukterNextHunk)
+nmap <Leader>hn <Plug>(GitGutterNextHunk)
 nmap <Leader>hp <Plug>(GitGutterPrevHunk)
 nmap <Leader>hv <Plug>(GitGutterPreviewHunk)
 " Colors in preview window
