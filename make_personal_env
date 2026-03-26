@@ -518,6 +518,7 @@ if ((PYTHON_PACKAGES == 1)); then
     pip3 install distro
     pip3 install paramiko
     pip3 install scp
+    pip3 install pyyaml
 fi
 
 py37_pfx=$opt_root/$os/python/3.7.4
