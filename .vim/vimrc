@@ -28,21 +28,18 @@ Plug 'tpope/vim-fugitive'
     " Plug 'mcchrish/nnn.vim'
 " endif
 Plug 'luukvbaal/nnn.nvim'
-Plug 'vim-scripts/Rename2'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 " Plug 'weynhamz/vim-plugin-minibufexpl'
 Plug 'airblade/vim-rooter'
 Plug 'airblade/vim-gitgutter'
 Plug 'chrisbra/csv.vim'
-Plug 'dkprice/vim-easygrep'
+
 Plug 'rust-lang/rust.vim'
 Plug 'ludovicchabant/vim-gutentags'
 " Plug 'Yilin-Yang/vim-markbar'
 Plug 'skywind3000/vim-quickui' 
-if !has('nvim') && has('lua')
-    Plug 'jeaye/color_coded'
-endif
+
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-obsession'
 Plug 'nanotee/zoxide.vim'
