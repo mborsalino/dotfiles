@@ -8,6 +8,7 @@ return {
         vim.o.foldlevel = 99      -- start with all folds open
         vim.o.foldlevelstart = 99
         vim.o.foldenable = true
+        vim.o.foldnestmax = 2     -- only fold 2 levels deep (module → class → method)
     end,
     opts = {
         -- Use treesitter as primary fold provider, indent as fallback
