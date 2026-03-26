@@ -490,15 +490,16 @@ autocmd BufEnter * :syntax sync fromstart
 "----------------------------------------------------------------------------------------------------------------------"
 
 " TagList
-let Tlist_Ctags_Cmd='/home/mborsali/bin/ctags'
+" rely on ctags being in PATH
+let Tlist_Ctags_Cmd='ctags'
 " show tag drop down menu in GVIM
 let Tlist_Show_Menu = 1
 " default behavior is sort by name
 let Tlist_Sort_Type = 'name'
 
 " TagBar
-let tagbar_ctags_bin='/home/mborsali/bin/ctags'
-" let tagbar_ctags_bin='/usr/bin/ctags'
+" rely on ctags being in PATH
+let tagbar_ctags_bin='ctags'
 let g:tagbar_position = 'left'
 " Write rust tags upone saving file
 autocmd BufWritePost *.rs :silent! exec "!rusty-tags vi --quiet --start-dir=" . expand('%:p:h') . "&" | redraw!
