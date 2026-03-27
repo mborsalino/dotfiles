@@ -588,6 +588,9 @@ nmap <Leader>sfc <Plug>CtrlSFCwordPath
 " ---------
 command! TmuxPaste put =system('tmux show-buffer')
 
+let g:quickui_border_style = 4
+let g:quickui_color_scheme = 'papercol_dark'
+
 call quickui#menu#reset()
 
 call quickui#menu#install('&Navigate', [
