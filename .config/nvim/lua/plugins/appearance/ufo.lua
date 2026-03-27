@@ -4,7 +4,7 @@ return {
     event = "VeryLazy",
     init = function()
         -- Required vim options for ufo to manage folds
-        vim.o.foldcolumn = "1"
+        vim.o.foldcolumn = "0"  -- hide fold gutter (ufo works without it)
         vim.o.foldlevel = 99      -- start with all folds open
         vim.o.foldlevelstart = 99
         vim.o.foldenable = true
