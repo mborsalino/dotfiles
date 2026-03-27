@@ -15,4 +15,6 @@ if [[ -d $HOME/ws ]]; then
             PATH="$HOME/ws/repos/matcb/bin:$PATH"
         fi
     fi
+
+    module load tig
 fi
