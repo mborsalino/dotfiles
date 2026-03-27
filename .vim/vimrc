@@ -659,6 +659,10 @@ call quickui#menu#install('&Fold', [
 
 call quickui#menu#install('&Misc', [
 			\ [ "Paste from &Tmux Buffer", 'TmuxPaste', 'Insert tmux paste buffer below cursor' ],
+			\ [ "--", ],
+			\ [ "Session &Save\t\\sss", 'call feedkeys("\\sss")', 'Save named session' ],
+			\ [ "Session &Load\t\\ssl", 'call feedkeys("\\ssl")', 'Load saved session' ],
+			\ [ "Session &Delete\t\\ssd", 'call feedkeys("\\ssd")', 'Delete saved session' ],
 			\ ])
 
 let g:context_menu_k = [
