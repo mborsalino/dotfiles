@@ -41,17 +41,29 @@ return {
       opts.desc = "LSP: Smart rename"
       keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
 
-      opts.desc = "Show buffer diagnostics"
+      opts.desc = "Show buffer diagnostics (Telescope)"
       keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts)
 
+      -- Mnemonic: ds=show, dn=next, dp=prev, dt=toggle
       opts.desc = "Show line diagnostics"
-      keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
-
-      opts.desc = "Go to previous diagnostic"
-      keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+      keymap.set("n", "<leader>ds", vim.diagnostic.open_float, opts)
 
       opts.desc = "Go to next diagnostic"
-      keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+      keymap.set("n", "<leader>dn", vim.diagnostic.goto_next, opts)
+
+      opts.desc = "Go to previous diagnostic"
+      keymap.set("n", "<leader>dp", vim.diagnostic.goto_prev, opts)
+
+      opts.desc = "Toggle diagnostics on/off"
+      local diagnostics_active = true
+      keymap.set("n", "<leader>dt", function()
+        diagnostics_active = not diagnostics_active
+        if diagnostics_active then
+          vim.diagnostic.show()
+        else
+          vim.diagnostic.hide()
+        end
+      end, opts)
 
       opts.desc = "Show documentation for what is under cursor"
       keymap.set("n", "<leader>k", vim.lsp.buf.hover, opts)
@@ -67,12 +79,7 @@ return {
     -- used to enable autocompletion (assign to every lsp server config)
     local capabilities = cmp_nvim_lsp.default_capabilities()
 
-    -- Change the Diagnostic symbols in the sign column (gutter)
-    local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
-    for type, icon in pairs(signs) do
-      local hl = "DiagnosticSign" .. type
-      vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-    end
+    -- Diagnostic signs are configured in nav/neo_tree.lua via vim.diagnostic.config()
 
     -- ----------------------------
     -- Setup individual LSP servers

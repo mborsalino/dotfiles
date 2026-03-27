@@ -68,44 +68,7 @@
             })
           })
 
-          -- Disable LSP semantic syntax highlighting 
-          for _, group in ipairs(vim.fn.getcompletion("@lsp", "highlight")) do
-                  vim.api.nvim_set_hl(0, group, {})
-          end
-
-          -- Toggle LSP Diagonistic on and off (server still running, but do not display errs/warnings)
-          local diagnostics_active = true
-          vim.keymap.set('n', '<leader>dt', function()
-            diagnostics_active = not diagnostics_active
-            if diagnostics_active then
-              vim.diagnostic.show()
-            else
-              vim.diagnostic.hide()
-            end
-          end)
-
-          -- Uncomment this if you're annoied by the inline diagnostics
-          -- vim.diagnostic.config({
-          --   virtual_text = false, -- Turn off inline diagnostics
-          -- })
-
-          -- Show all diagnostics on current line in floating window
-          vim.api.nvim_set_keymap(
-            'n', '<Leader>ds', ':lua vim.diagnostic.open_float()<CR>',
-            { noremap = true, silent = true }
-          )
-          -- Go to next diagnostic (if there are multiple on the same line, only shows
-          -- one at a time in the floating window)
-          vim.api.nvim_set_keymap(
-            'n', '<Leader>dn', ':lua vim.diagnostic.goto_next()<CR>',
-            { noremap = true, silent = true }
-          )
-          -- Go to prev diagnostic (if there are multiple on the same line, only shows
-          -- one at a time in the floating window)
-          vim.api.nvim_set_keymap(
-            'n', '<Leader>dp', ':lua vim.diagnostic.goto_prev()<CR>',
-            { noremap = true, silent = true }
-          )
+          -- Diagnostic keymaps (ds/dn/dp/dt) are in lsp/lspconfig.lua on_attach
       end
 }
 
