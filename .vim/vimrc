@@ -24,10 +24,7 @@ if !has('nvim')
 endif
 Plug 'tpope/vim-fugitive'
 " Plug 'preservim/nerdtree'
-" if !has('nvim')
-    " Plug 'mcchrish/nnn.vim'
-" endif
-Plug 'luukvbaal/nnn.nvim'
+" Plug 'mcchrish/nnn.vim'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 " Plug 'weynhamz/vim-plugin-minibufexpl'
@@ -671,8 +668,5 @@ nnoremap <silent><space><space> :call quickui#menu#open()<cr>
 nnoremap <silent>K :call quickui#tools#clever_context('k', g:context_menu_k, {})<cr>
 
 
-" Nnn
-" use the same nnn session within a vim session
-let g:nnn#session = 'local'
 
 
