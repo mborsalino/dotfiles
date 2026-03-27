@@ -11,7 +11,7 @@ return {
             local chan = vim.bo[buf].channel
             if chan and chan > 0 then
                 local pid = vim.fn.jobpid(chan)
-                local cwd = vim.loop.fs_readlink("/proc/" .. pid .. "/cwd")
+                local cwd = vim.uv.fs_readlink("/proc/" .. pid .. "/cwd")
                 if cwd then
                     vim.cmd("cd " .. vim.fn.fnameescape(cwd))
                     vim.defer_fn(function() vim.notify("pwd: " .. cwd) end, 100)
@@ -97,7 +97,7 @@ return {
                     local chan = vim.bo[buf].channel
                     if chan and chan > 0 then
                         local pid = vim.fn.jobpid(chan)
-                        local cwd = vim.loop.fs_readlink("/proc/" .. pid .. "/cwd")
+                        local cwd = vim.uv.fs_readlink("/proc/" .. pid .. "/cwd")
                         if cwd then
                             vim.notify(cwd)
                         end
