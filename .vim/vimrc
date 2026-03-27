@@ -37,7 +37,10 @@ Plug 'ludovicchabant/vim-gutentags'
 " Plug 'Yilin-Yang/vim-markbar'
 Plug 'skywind3000/vim-quickui' 
 
-Plug 'tpope/vim-commentary'
+" vim-only: Comment.nvim (lazy.nvim) provides gcc/gc in neovim
+if !has('nvim')
+    Plug 'tpope/vim-commentary'
+endif
 Plug 'tpope/vim-obsession'
 Plug 'nanotee/zoxide.vim'
 
