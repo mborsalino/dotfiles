@@ -19,6 +19,7 @@ require("lazy").setup(
         {import = "plugins.nav" },
         {import = "plugins.appearance" },
         {import = "plugins.lsp" },
+        {import = "plugins.ai" },
         {import = "vim" }, -- needed to source legacy vimrc that uses vim-plug
     },
     {

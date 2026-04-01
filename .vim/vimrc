@@ -657,6 +657,12 @@ call quickui#menu#install('&Fold', [
 			\ [ "Close One &More Level\tzm", 'normal! zm', 'Close one more fold level globally' ],
 			\ ])
 
+call quickui#menu#install('&AI', [
+			\ [ "&Ask Avante\t\\aa", 'AvanteAsk', 'Open Avante chat sidebar' ],
+			\ [ "&Edit Selection\t\\ae", 'AvanteEdit', 'Edit selected code with AI' ],
+			\ [ "&Toggle Sidebar\t\\at", 'AvanteToggle', 'Toggle Avante sidebar visibility' ],
+			\ ])
+
 call quickui#menu#install('&Misc', [
 			\ [ "Paste from &Tmux Buffer", 'TmuxPaste', 'Insert tmux paste buffer below cursor' ],
 			\ [ "--", ],
