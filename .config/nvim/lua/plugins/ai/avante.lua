@@ -1,3 +1,15 @@
+--- Read the API key from Claude Code's OAuth-managed config.
+--- The key is generated during `claude` SSO login and stored in ~/.claude.json.
+local function get_claude_api_key()
+    local path = vim.fn.expand("~/.claude.json")
+    local f = io.open(path, "r")
+    if not f then return nil end
+    local content = f:read("*a")
+    f:close()
+    local key = content:match('"primaryApiKey"%s*:%s*"(sk%-ant%-[^"]+)"')
+    return key
+end
+
 return {
     "yetone/avante.nvim",
     event = "VeryLazy",
@@ -5,9 +17,14 @@ return {
     build = "make",
     opts = {
         provider = "claude",
-        claude = {
-            model = "claude-sonnet-4-6-20250514",
-            max_tokens = 4096,
+        providers = {
+            claude = {
+                api_key_name = { "echo", get_claude_api_key() },
+                model = "claude-haiku-4-5-20251001",
+                extra_request_body = {
+                    max_tokens = 4096,
+                },
+            },
         },
         -- Default keybindings (made explicit for clarity)
         mappings = {
