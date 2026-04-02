@@ -26,15 +26,15 @@ return {
                 },
             },
         },
-        -- Default keybindings (made explicit for clarity)
+        -- Keybindings: <Leader>a = AI, a = avante, then action
         mappings = {
-            ask = "<Leader>aa",       -- Open chat sidebar
-            edit = "<Leader>ae",      -- Edit selected code with AI
-            refresh = "<Leader>ar",   -- Regenerate response
+            ask = "<Leader>aaa",       -- ai avante ask
+            edit = "<Leader>aae",      -- ai avante edit
+            refresh = "<Leader>aar",   -- ai avante refresh
             toggle = {
-                default = "<Leader>at", -- Toggle sidebar visibility
+                default = "<Leader>aat", -- ai avante toggle
             },
-            focus = "<Leader>af",     -- Switch focus between sidebar and code
+            focus = "<Leader>aaf",     -- ai avante focus
         },
     },
     dependencies = {

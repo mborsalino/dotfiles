@@ -658,9 +658,13 @@ call quickui#menu#install('&Fold', [
 			\ ])
 
 call quickui#menu#install('&AI', [
-			\ [ "&Ask Avante\t\\aa", 'AvanteAsk', 'Open Avante chat sidebar' ],
-			\ [ "&Edit Selection\t\\ae", 'AvanteEdit', 'Edit selected code with AI' ],
-			\ [ "&Toggle Sidebar\t\\at", 'AvanteToggle', 'Toggle Avante sidebar visibility' ],
+			\ [ "Avante &Ask\t\\aaa", 'AvanteAsk', 'Open Avante chat sidebar' ],
+			\ [ "Avante &Edit Selection\t\\aae", 'AvanteEdit', 'Edit selected code with AI' ],
+			\ [ "Avante &Toggle Sidebar\t\\aat", 'AvanteToggle', 'Toggle Avante sidebar visibility' ],
+			\ [ "--", ],
+			\ [ "Claude &Toggle\t\\act", 'ClaudeCode', 'Toggle Claude Code terminal' ],
+			\ [ "Claude &Send Selection\t\\acs", 'ClaudeCodeSend', 'Send selection to Claude' ],
+			\ [ "Claude A&dd File\t\\acd", 'ClaudeCodeAdd', 'Add file to Claude context' ],
 			\ ])
 
 call quickui#menu#install('&Misc', [

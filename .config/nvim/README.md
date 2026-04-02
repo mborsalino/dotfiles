@@ -87,11 +87,11 @@ change the model in `plugins/ai/avante.lua`.
 
 | Key | Mode | Action |
 |-----|------|--------|
-| `<Leader>aa` | normal/visual | Open chat sidebar (with selection context in visual) |
-| `<Leader>ae` | visual | Edit selected code with AI |
-| `<Leader>ar` | normal | Regenerate response |
-| `<Leader>at` | normal | Toggle sidebar visibility |
-| `<Leader>af` | normal | Switch focus between sidebar and code |
+| `<Leader>aaa` | normal/visual | Open chat sidebar (with selection context in visual) |
+| `<Leader>aae` | visual | Edit selected code with AI |
+| `<Leader>aar` | normal | Regenerate response |
+| `<Leader>aat` | normal | Toggle sidebar visibility |
+| `<Leader>aaf` | normal | Switch focus between sidebar and code |
 
 ### claudecode.nvim — CLI bridge (full OAuth rate limits)
 
@@ -101,6 +101,12 @@ All API calls go through the CLI's OAuth session — no API key needed, full org
 rate limits, all models available.
 
 See `plugins/ai/claudecode.lua` for configuration.
+
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>act` | normal | Toggle Claude Code terminal |
+| `<Leader>acs` | visual | Send selection to Claude |
+| `<Leader>acd` | normal | Add current file to Claude context |
 
 ### Why two plugins?
 
