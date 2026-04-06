@@ -60,11 +60,7 @@ return {
         opts.desc = "Toggle diagnostics on/off"
         keymap.set("n", "<leader>dt", function()
           diagnostics_active = not diagnostics_active
-          if diagnostics_active then
-            vim.diagnostic.show()
-          else
-            vim.diagnostic.hide()
-          end
+          vim.diagnostic.enable(diagnostics_active)
         end, opts)
 
         opts.desc = "Show documentation for what is under cursor"
