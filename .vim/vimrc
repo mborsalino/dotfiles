@@ -45,6 +45,7 @@ Plug 'tpope/vim-obsession'
 Plug 'nanotee/zoxide.vim'
 
 Plug 'wincent/ferret'
+let g:FerretMap = 0
 Plug 'stefandtw/quickfix-reflector.vim'
 
 Plug 'dyng/ctrlsf.vim'
