@@ -99,6 +99,12 @@ bind 'set completion-ignore-case on'
 # Setup sbruf autocompletion
 complete -C compl_sbruf.py sbruf
 
+# Source custom completions from ~/.config/bash/completions/
+for _f in ~/.config/bash/completions/*.bash; do
+    [ -f "$_f" ] && source "$_f"
+done
+unset _f
+
 # We don't manage NVM via modulefiles, so use a traditional approach here
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
