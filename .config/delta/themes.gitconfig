@@ -231,3 +231,47 @@
     plus-emph-style = syntax bold "#007800"
     plus-style = syntax "#004433"
     whitespace-error-style = "#280050"
+
+[delta "axolotl"]
+    # Colorblind-friendly theme based on calochortus-lyallii
+    # Hunk header: cyan underlined file, bright-orange line number
+    # Removed lines: dark grey (fading away)
+    # Added lines: bright orange, emphasized parts with dark background
+    # File summary: cyan background
+    # author: mattia + copilot
+    #
+    # Previous color variants for reference:
+    #   orange:  #ff9944 (too red on some monitors)
+    #   gold:    #FFD700 (too yellow)
+    #   pink:    #ff79c6 (dracula-style, original attempt)
+    dark = true
+    commit-decoration-style = none
+    file-added-label = [+]
+    file-copied-label = [C]
+    file-decoration-style = none
+    file-modified-label = [M]
+    file-removed-label = [-]
+    file-renamed-label = [R]
+    file-style = bold "#003333" cyan
+    hunk-header-decoration-style = cyan ul
+    hunk-header-file-style = cyan ul
+    hunk-header-line-number-style = "#FFB030"
+    hunk-header-style = file line-number syntax
+    keep-plus-minus-markers = true
+    line-numbers = true
+    line-numbers-left-style = "#555555"
+    line-numbers-minus-style = "#666666"
+    line-numbers-plus-style = "#FFB030"
+    line-numbers-right-style = "#555555"
+    line-numbers-zero-style = "#666666"
+    minus-style = "#555555"
+    minus-emph-style = "#555555" "#333333"
+    minus-non-emph-style = "#555555"
+    minus-empty-line-marker-style = normal
+    plus-style = "#FFB030"
+    plus-emph-style = "#FFB030" "#3a2800"
+    plus-non-emph-style = "#FFB030"
+    plus-empty-line-marker-style = normal
+    whitespace-error-style = "#280050" reverse
+    zero-style = normal
+    syntax-theme = none

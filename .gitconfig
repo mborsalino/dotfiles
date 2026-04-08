@@ -99,7 +99,7 @@
 
 # Set my proferred colorscheme (for dark backgrounds)
 [delta]
-    features = calochortus-lyallii 
+    features = axolotl 
 	navigate = true  # use n and N to move between diff sections
 	max-line-length = 0
     # side-by-side = true
