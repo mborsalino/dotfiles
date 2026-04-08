@@ -72,29 +72,46 @@
 _git_fzf_get_files() {
     local cmd="$1"
 
+    # git status --porcelain returns paths relative to the repo root.
+    # We need paths relative to cwd so they work with git diff/add.
+    # git rev-parse --show-prefix gives our cwd relative to root (e.g. "src/stack/").
+    # We strip that prefix from each path, and skip files outside our cwd.
+    local prefix
+    prefix=$(git rev-parse --show-prefix 2>/dev/null)
+    # prefix is empty at repo root, or "some/path/" in a subdirectory
+
+    local raw_files
     case "$cmd" in
         diff|sdiff)
             if [[ " ${COMP_WORDS[*]} " == *" --cached "* ]] || \
                [[ " ${COMP_WORDS[*]} " == *" --staged "* ]]; then
-                # Staged files: status code in column 1 (non-space, non-?)
-                git status --porcelain --no-renames 2>/dev/null \
+                raw_files=$(git status --porcelain --no-renames 2>/dev/null \
                     | grep '^[MADRC]' \
-                    | cut -c4-
+                    | cut -c4-)
             else
-                # Unstaged modified files: status code in column 2
-                # Also catches MM (modified in both staging and working tree)
-                git status --porcelain --no-renames 2>/dev/null \
+                raw_files=$(git status --porcelain --no-renames 2>/dev/null \
                     | grep '^ [MADRC]\|^MM' \
-                    | cut -c4-
+                    | cut -c4-)
             fi
             ;;
         add)
-            # Untracked (??) and unstaged modifications (column 2)
-            git status --porcelain --no-renames 2>/dev/null \
+            raw_files=$(git status --porcelain --no-renames 2>/dev/null \
                 | grep '^ [MADRC]\|^??' \
-                | cut -c4-
+                | cut -c4-)
             ;;
     esac
+
+    if [[ -z "$prefix" ]]; then
+        # At repo root: paths are already correct
+        echo "$raw_files"
+    else
+        # In a subdirectory: strip the prefix, skip files outside cwd
+        echo "$raw_files" | while IFS= read -r f; do
+            if [[ "$f" == "$prefix"* ]]; then
+                echo "${f#"$prefix"}"
+            fi
+        done
+    fi
 }
 
 # ---------------------------------------------------------------------------
