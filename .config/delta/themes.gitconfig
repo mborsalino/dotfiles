@@ -253,10 +253,13 @@
     file-removed-label = [-]
     file-renamed-label = [R]
     file-style = bold "#003333" cyan
-    hunk-header-decoration-style = cyan ul
-    hunk-header-file-style = cyan ul
+    # The following draws a solid line under the file path/lineno of each chunk
+    hunk-header-decoration-style = cyan box 
+    # hunk-header-decoration-style = cyan ul
+    # hunk-header-decoration-style = none
+    hunk-header-file-style = cyan ul 
     hunk-header-line-number-style = "#FFB030"
-    hunk-header-style = file line-number syntax
+    hunk-header-style = file line-number cyan
     keep-plus-minus-markers = true
     line-numbers = true
     line-numbers-left-style = "#555555"
