@@ -34,6 +34,8 @@
 
 [diff]
 	tool = meld
+	# Lines of context around each change (default: 3). Override per-command with -U<n>
+	context = 5
 
 [difftool "p4merge"]
     # path = /home/mborsalino/bin/p4merge
