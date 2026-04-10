@@ -175,9 +175,29 @@ let g:seoul256_light_background = 256
 " let g:seoul256_srgb = 1
 colorscheme seoul256
 
+" Highlight trailing whitespace with a subtle dark grey background.
+" Uses match instead of set list so tabs aren't affected.
+" The \%#\@<! avoids highlighting while typing at end of line.
+highlight TrailingWhitespace guibg=#333333 ctermbg=236
+match TrailingWhitespace /\s\+\%#\@<!$/
+
 "----------------------------------------------------------------------------------------------------------------------"
 " Custom Functions
 "----------------------------------------------------------------------------------------------------------------------"
+
+" Toggle trailing whitespace highlighting on/off
+let g:trailing_ws_enabled = 1
+function! ToggleTrailingWhitespace()
+    if g:trailing_ws_enabled
+        match none
+        let g:trailing_ws_enabled = 0
+        echo "Trailing whitespace highlight OFF"
+    else
+        match TrailingWhitespace /\s\+\%#\@<!$/
+        let g:trailing_ws_enabled = 1
+        echo "Trailing whitespace highlight ON"
+    endif
+endfunction
 
 " Print current buffer to file, according to current color scheme "
 function! Print_old()
@@ -670,6 +690,9 @@ call quickui#menu#install('&AI', [
 
 call quickui#menu#install('&Misc', [
 			\ [ "Paste from &Tmux Buffer", 'TmuxPaste', 'Insert tmux paste buffer below cursor' ],
+			\ [ "--", ],
+			\ [ "Toggle &Trailing Whitespace", 'call ToggleTrailingWhitespace()', 'Show/hide trailing whitespace highlight' ],
+			\ [ "Toggle Cursor &Column", 'set cursorcolumn!', 'Show/hide vertical cursor column guide' ],
 			\ [ "--", ],
 			\ [ "Session &Save\t\\sss", 'call feedkeys("\\sss")', 'Save named session' ],
 			\ [ "Session &Load\t\\ssl", 'call feedkeys("\\ssl")', 'Load saved session' ],
