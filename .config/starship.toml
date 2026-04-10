@@ -5,7 +5,7 @@ add_newline = false
 [line_break]
 disabled = false
 
-format = "${custom...sbruf_prompt} $all"
+format = "${custom.sbruf_prompt} $all${custom.git_branch} "
 
 [username]
 style_user = "white bold"
@@ -21,7 +21,7 @@ trim_at = ".companyname.com"
 disabled = false
 
 [directory]
-truncation_length = 3 
+truncation_length = 3
 truncation_symbol = "…/"
 
 [cmd_duration]
@@ -30,12 +30,23 @@ disabled = true
 [python]
 disabled = true
 
+# Built-in git_branch disabled — see [custom.git_branch] below
+# [git_branch]
+# truncation_length = 10
+# truncation_symbol = "⁖"
+# symbol = ""
+# style = "bold purple"
+# format = "[$symbol$branch]($style)"
+
 [git_branch]
-truncation_length = 10 
-truncation_symbol = "⁖"
-symbol = ""
+disabled = true
+
+# Custom git branch: strips "mattiab/" prefix to "m/", truncates to 10 chars
+[custom.git_branch]
+command = 'b=$(git branch --show-current 2>/dev/null); b=${b/#mattiab\//m/}; [ ${#b} -gt 10 ] && b="${b:0:9}⁖"; echo "$b"'
+when = "git rev-parse --is-inside-work-tree 2>/dev/null"
 style = "bold purple"
-format = "[$symbol$branch]($style)"
+format = "[$output]($style)"
 
 [custom.sbruf_prompt]
 command = "sbruf prompt --env-only 2>&1"
@@ -44,4 +55,3 @@ command = "sbruf prompt --env-only 2>&1"
 when = "test 1"
 style = "fg:cyan"
 # symbol = "∳"
-
