@@ -139,7 +139,7 @@ return {
 
     -- configure jedi (python intellisense)
     vim.lsp.config("jedi-language-server", {
-      cmd = { "jedi-language-server" },
+      cmd = { vim.fn.stdpath("data") .. "/mason/bin/jedi-language-server" },
       filetypes = { "python" },
       root_markers = {
         "pyproject.toml",
