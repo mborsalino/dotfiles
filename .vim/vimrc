@@ -178,24 +178,42 @@ colorscheme seoul256
 " Highlight trailing whitespace with a subtle dark grey background.
 " Uses match instead of set list so tabs aren't affected.
 " The \%#\@<! avoids highlighting while typing at end of line.
-highlight TrailingWhitespace guibg=#333333 ctermbg=236
-match TrailingWhitespace /\s\+\%#\@<!$/
+" Applied via autocmd so it persists across buffer/window switches
+" (match is window-local and gets cleared otherwise).
+highlight TrailingWhitespace guibg=#444444 ctermbg=238
+let g:trailing_ws_enabled = 1
+
+function! ApplyTrailingWhitespace()
+    if g:trailing_ws_enabled
+        match TrailingWhitespace /\s\+\%#\@<!$/
+    endif
+endfunction
+
+augroup TrailingWS
+    autocmd!
+    autocmd BufWinEnter,WinEnter * call ApplyTrailingWhitespace()
+    autocmd ColorScheme * highlight TrailingWhitespace guibg=#444444 ctermbg=238 | call ApplyTrailingWhitespace()
+augroup END
+
+" Apply immediately for the first window
+call ApplyTrailingWhitespace()
 
 "----------------------------------------------------------------------------------------------------------------------"
 " Custom Functions
 "----------------------------------------------------------------------------------------------------------------------"
 
 " Toggle trailing whitespace highlighting on/off
-let g:trailing_ws_enabled = 1
 function! ToggleTrailingWhitespace()
     if g:trailing_ws_enabled
-        match none
+        " Clear match in all windows
+        windo match none
         let g:trailing_ws_enabled = 0
-        echo "Trailing whitespace highlight OFF"
+        lua vim.notify("Trailing whitespace highlight OFF", vim.log.levels.INFO)
     else
-        match TrailingWhitespace /\s\+\%#\@<!$/
+        " Apply match in all windows
+        windo match TrailingWhitespace /\s\+\%#\@<!$/
         let g:trailing_ws_enabled = 1
-        echo "Trailing whitespace highlight ON"
+        lua vim.notify("Trailing whitespace highlight ON", vim.log.levels.INFO)
     endif
 endfunction
 
