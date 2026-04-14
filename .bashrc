@@ -26,6 +26,7 @@ fi
 OPT_ROOT=$ENV_ROOT/opt/$os
 source $ENV_ROOT/cfg/sbruf.env.bash
 
+
 # Avoid autocompletion escape the $ sign (so allow expansion of env vars)
 shopt -s direxpand
 

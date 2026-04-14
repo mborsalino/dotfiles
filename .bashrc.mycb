@@ -15,9 +15,17 @@ if [[ -d $HOME/ws ]]; then
             PATH="$HOME/ws/repos/matcb/bin:$PATH"
         fi
     fi
-    
+
     [ -f $HOME/.bashrc.mycb.secret ] && source $HOME/.bashrc.mycb.secret
-    # TODO: find out why this does not work here 
+    # TODO: find out why this does not work here
     # module load tig
-    module use $HOME/ws/shared/bottega/modulefiles/ 
+
+    # asic system, xs is in bottega
+    bottega=$HOME/ws/shared/bottega
+    [ -d $bottega ] && module use $bottega/modulefiles/
+
+    # local wsl, xs in in /env/opt/ext
+    opt_ext=/env/opt/ext
+    [ -d $opt_ext ] && module use $opt_ext/modulefiles/
+
 fi
