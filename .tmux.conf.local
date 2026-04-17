@@ -94,11 +94,58 @@ set-window-option -g window-status-bell-style fg=black,bg=red #base02, red
 # Center the window list in the status line
 set -g status-justify centre
 
+# ============================================================
+# Clipboard via OSC 52
+# ============================================================
+# OSC 52 is a terminal escape sequence that lets any program
+# running inside a terminal say "please put this text on the
+# system clipboard." The terminal emulator (Windows Terminal,
+# WezTerm, Ghostty, Alacritty, iTerm2, Kitty, ...) is the thing
+# that actually writes to the clipboard; tmux just emits the
+# request.
+#
+# The chain on every copy:
+#
+#   [ copy-mode y ]
+#          |
+#          v
+#   [ tmux ] ── writes to its own paste buffer
+#          |     (prefix + b lists all buffers)
+#          |
+#          | set-clipboard=on also emits:
+#          | ESC ] 52 ; c ; <base64 of selection> BEL
+#          v
+#   [ SSH pipe (if remote) ] ── escape bytes pass through untouched
+#          v
+#   [ terminal emulator ] ── sees OSC 52, decodes, writes clipboard
+#          v
+#   [ OS clipboard ] ── now has the text; paste anywhere
+#
+# Why this is portable across machines:
+#   Remote tmux just emits bytes; SSH is a dumb pipe for them;
+#   the LOCAL terminal does the clipboard write. No clip.exe,
+#   xclip, pbcopy, X forwarding or per-server daemon needed.
+#   Same config works locally on WSL and over SSH everywhere.
+# ============================================================
+
+# tmux's copy commands should emit the OSC 52 escape in addition
+# to saving the selection into the internal paste-buffer list.
+set -g set-clipboard on
+
+# Terminfo doesn't always advertise the OSC 52 clipboard capability,
+# so tell tmux to trust that every terminal we use supports it.
+# Modern terminals (Windows Terminal, WezTerm, Ghostty, Alacritty,
+# iTerm2, Kitty, ...) all do.
+set -ag terminal-features ',*:clipboard'
+
 # enable vi keys in copy mode
 setw -g mode-keys vi
 bind Escape copy-mode
 bind-key -T copy-mode-vi v send -X begin-selection
-bind-key -T copy-mode-vi y send -X copy-selection
+# -and-cancel exits copy-mode after copying; because set-clipboard
+# is on, this single action both saves to a tmux paste buffer AND
+# triggers the OSC 52 emission to the system clipboard.
+bind-key -T copy-mode-vi y send -X copy-selection-and-cancel
 unbind p
 bind p paste-buffer
 
