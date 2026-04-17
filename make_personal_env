@@ -37,6 +37,7 @@ set_env_vars() {
         TAR=1
         TIG=1
         GLOW=1
+        TMUX=1
     elif [[ $subset == necessary ]]; then
         ENV_MOD=1
         CFG_FILE=1
@@ -63,6 +64,7 @@ set_env_vars() {
         TAR=1
         TIG=0
         GLOW=0
+        TMUX=0
     elif [[ $subset == optional ]]; then
         ENV_MOD=0
         CFG_FILE=0
@@ -85,6 +87,7 @@ set_env_vars() {
         TAR=0
         TIG=1
         GLOW=1
+        TMUX=1
     elif [[ $subset == filter ]]; then
         printf "${CYAN}Using custom set. "
         printf "We trust you took care of setting the appropriate env vars"
@@ -110,6 +113,7 @@ set_env_vars() {
         [ -z $TAR ] && TAR=0
         [ -z $TIG ] && TIG=0
         [ -z $GLOW ] && GLOW=0
+        [ -z $TMUX ] && TMUX=0
     else
         printf "${RED} Unrecognized argument to --which${NOCOLOR}\n"
         exit 1
@@ -243,6 +247,11 @@ TAR
 
 GLOW
     Terminal markdown renderer (charmbracelet/glow)
+
+TMUX
+    A modern tmux (>= 3.2) built from source. Required by the user's tmux
+    config (OSC 52, display-popup, etc.) on hosts where the system tmux is
+    too old.
 
 The following env var can be used to debug texlive installation:
 
@@ -996,6 +1005,49 @@ if { [ module-info mode load ] } {
     puts stderr "Please source $fzf_parent_dir/fzf/shell/completion.bash"
     puts stderr "Please source $fzf_parent_dir/fzf/shell/key-bindings.bash"
 }
+EOM
+fi
+
+if (( TMUX == 1 )); then
+    log_progress "TMUX"
+    tmux_version=3.6a
+    install_dir=$opt_root/$os/tmux/$tmux_version
+
+    # Skip the build if this exact version is already installed at the target prefix
+    tmux_skip=
+    if [[ -x $install_dir/bin/tmux ]]; then
+        existing_ver=$($install_dir/bin/tmux -V 2>/dev/null | awk '{print $2}')
+        if [[ $existing_ver == $tmux_version ]]; then
+            echo "tmux $tmux_version already installed at $install_dir, skipping build"
+            tmux_skip=1
+        fi
+    fi
+
+    if [[ -z $tmux_skip ]]; then
+        # Build deps required (install via system package manager beforehand):
+        # Ubuntu/Debian: libevent-dev libncurses-dev bison pkg-config build-essential autoconf automake
+        # SLES:          libevent-devel ncurses-devel bison pkg-config gcc make autoconf automake
+        # Rocky/RHEL:    libevent-devel ncurses-devel bison pkgconfig gcc make autoconf automake
+        build_dir=$tmp/tmux
+        rm -rf $build_dir && mkdir $build_dir
+        cd $build_dir
+        wget https://github.com/tmux/tmux/releases/download/${tmux_version}/tmux-${tmux_version}.tar.gz
+        tar -xzf tmux-${tmux_version}.tar.gz
+        cd tmux-${tmux_version}
+
+        # Build and install
+        ./configure --prefix=$install_dir
+        make
+        mkdir -p $install_dir
+        make install
+    fi
+
+    # Create module file
+    mkdir -p $modulefiles_os_root/tmux
+    cat << EOM > $modulefiles_os_root/tmux/$tmux_version
+#%Module
+prepend-path PATH $install_dir/bin
+prepend-path MANPATH $install_dir/share/man
 EOM
 fi
 
