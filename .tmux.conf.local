@@ -1,6 +1,8 @@
-new-session
 set -g mouse on
 set -g history-limit 30000
+
+# How long the big pane numbers stay on screen after prefix + q (ms)
+set -g display-panes-time 3000
 
 # Remapping prefix to C-space
 unbind C-b
