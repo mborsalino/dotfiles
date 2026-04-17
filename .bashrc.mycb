@@ -17,12 +17,14 @@ if [[ -d $HOME/ws ]]; then
     fi
 
     [ -f $HOME/.bashrc.mycb.secret ] && source $HOME/.bashrc.mycb.secret
-    # TODO: find out why this does not work here
-    # module load tig
+    module load tig
 
     # asic system, xs is in bottega
     bottega=$HOME/ws/shared/bottega
-    [ -d $bottega ] && module use $bottega/modulefiles/
+    if [[ -d $bottega ]]; then
+        module use $bottega/modulefiles/
+        module load tmux/3.6a
+    fi
 
     # local wsl, xs in in /env/opt/ext
     opt_ext=/env/opt/ext
