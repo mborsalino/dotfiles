@@ -142,10 +142,34 @@ set -ag terminal-features ',*:clipboard'
 setw -g mode-keys vi
 bind Escape copy-mode
 bind-key -T copy-mode-vi v send -X begin-selection
-# -and-cancel exits copy-mode after copying; because set-clipboard
-# is on, this single action both saves to a tmux paste buffer AND
-# triggers the OSC 52 emission to the system clipboard.
-bind-key -T copy-mode-vi y send -X copy-selection-and-cancel
+
+# --- Copy-mode behavior overrides ---------------------------------------
+# IMPORTANT: oh-my-tmux (main ~/.tmux.conf) installs its own copy-mode-vi
+# defaults via async `run -b 'tmux bind ... || true'` AFTER this file is
+# sourced. Direct `bind-key` statements here get clobbered the moment
+# those async runs execute. To win the race we also wrap our overrides
+# in `run -b`, which queues them AFTER the oh-my-tmux ones — same async
+# mechanism, just processed later.
+#
+# Why each override:
+#   y                 copy-selection-no-clear instead of -and-cancel so
+#                     the scroll position and selection stay put; OSC 52
+#                     still fires to the system clipboard because
+#                     set-clipboard is on.
+#   MouseDown1Pane    default cancels copy-mode on click — unbind so a
+#                     click just selects the pane.
+#   MouseDragEnd1Pane copy-selection-no-clear: keeps the highlight
+#                     visible after release AND ends the "selecting"
+#                     state so scrolling doesn't extend it.
+#   Escape            context-aware via #{selection_present} (tmux 3.1+):
+#                     clear selection if one exists, otherwise cancel
+#                     copy-mode. Vim-like single-press behavior.
+# ------------------------------------------------------------------------
+run -b 'tmux bind-key -T copy-mode-vi y send -X copy-selection-no-clear'
+run -b 'tmux unbind-key -T copy-mode-vi MouseDown1Pane'
+run -b 'tmux bind-key -T copy-mode-vi MouseDragEnd1Pane send -X copy-selection-no-clear'
+run -b 'tmux bind-key -T copy-mode-vi Escape if-shell -F "##{selection_present}" "send -X clear-selection" "send -X cancel"'
+
 unbind p
 bind p paste-buffer
 
