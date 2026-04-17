@@ -1,0 +1,382 @@
+# yaml-language-server: $schema=config.schema.yaml
+#
+# =====================================================================
+# tmux-which-key config — learn-wrapper wrapped
+# =====================================================================
+# Every menu entry's `command:` is routed through
+# ~/bin/tmux-which-key-learn.sh, which flashes the executed tmux
+# command PLUS its direct keybinding(s) before running it. The menu
+# stops being a permanent crutch and starts teaching the real tmux
+# shortcuts.
+#
+# Shape of a wrapped entry
+# ------------------------
+# Simple command:
+#
+#   - name: Enter copy-mode
+#     key: C
+#     command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\"copy-mode\\\"\""
+#
+# Command with tmux format (e.g. #{pane_current_path}):
+#
+#   - name: New window
+#     key: c
+#     command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\"neww -c #{pane_current_path}\\\"\""
+#
+# Command whose inner text already contains double quotes needs a
+# fourth layer of escape — see the complex Rename/Kill entries below.
+#
+# Why all those backslashes (and no single quotes anywhere)
+# ---------------------------------------------------------
+# The plugin emits each menu variable as
+#   set -g @wk_menu_* '...'
+# — an OUTER SINGLE-QUOTED tmux string that has no escape mechanism.
+# So we cannot put a single quote anywhere inside the wrap (it would
+# truncate the menu variable and break every subsequent entry).
+# We therefore quote the user command with DOUBLE quotes at the sh
+# level and escape $, `, \, " accordingly.
+#
+# Then there are three unescape passes between the YAML file and the
+# final executed command:
+#   1. pyyaml parses the YAML double-quoted scalar.
+#   2. build.py wraps the result for init.tmux via add_quotes(),
+#      which only escapes `"`, not `\`. So backslashes must already
+#      be doubled in the Python string.
+#   3. tmux parses the init.tmux token with its own "..." parser.
+# The net effect: every literal `\"` that reaches sh requires
+# `\\\\\"` (four backslashes and an escaped quote) in the YAML
+# source. It's ugly but mechanical — do not hand-edit; regenerate.
+#
+# Regenerating
+# ------------
+# After editing any `command:` in this file, regenerate the wrapped
+# form with the companion Python tool, then rebuild the menu:
+#
+#   python3 ~/bin/wrap-tmux-which-key-yaml.py \
+#       < ~/.config/tmux/plugins/tmux-which-key/config.yaml \
+#       > /tmp/config.wrapped.yaml
+#
+#   cp /tmp/config.wrapped.yaml \
+#      ~/.config/tmux/plugins/tmux-which-key/config.yaml
+#
+#   ~/.tmux/plugins/tmux-which-key/plugin.sh.tmux   # rebuilds init.tmux
+#
+# The tool is idempotent (it detects "tmux-which-key-learn.sh" and
+# skips already-wrapped lines) and ignores the `macros:` block.
+#
+# See also
+# --------
+#   ~/bin/tmux-which-key-learn.sh       — the runtime wrapper script
+#   ~/bin/wrap-tmux-which-key-yaml.py   — the wrap tool
+#   ~/.tmux.conf.local                  — enables XDG path via
+#                                         `set -g @tmux-which-key-xdg-enable 1`
+# =====================================================================
+#
+#
+# Wrapping a menu command so picking it teaches you the keybinding
+# ----------------------------------------------------------------
+# Any `command:` can be routed through ~/bin/tmux-which-key-learn.sh,
+# which flashes the executed tmux command + its direct keybinding (if
+# one exists in the live tmux server) before running it. The lookup
+# is dynamic, so rebinding keys is reflected immediately.
+#
+# Shape of a wrapped entry:
+#
+#   - name: Enter copy-mode
+#     key: C
+#     command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh 'copy-mode'\""
+#
+# The outer YAML double-quotes contain a tmux command; inside, the
+# run-shell argument is itself double-quoted (escaped as \") and the
+# actual tmux command you're running is single-quoted. Single quotes
+# preserve tmux formats like #{pane_current_path} literally for the
+# shell, which then passes them on to `tmux ...` where they're
+# finally expanded.
+#
+# For commands whose literal text already contains double quotes
+# (e.g. `confirm -p "..." killw`), escape each inner `"` as `\\\"`
+# inside the outer YAML string.
+#
+# See ~/bin/tmux-which-key-learn.sh for the full rationale.
+#
+command_alias_start_index: 200
+keybindings:
+  # root_table: C-Space
+  prefix_table: Space
+title:
+  style: align=centre,bold
+  prefix: tmux
+  prefix_style: fg=green,align=centre,bold
+position:
+  x: R
+  y: P
+custom_variables:
+  - name: log_info
+    value: "#[fg=green,italics] [info]#[default]#[italics]"
+macros:
+  - name: reload-config
+    commands:
+      - display "#{log_info} Loading config... "
+      - source-file $HOME/.tmux.conf
+      - display -p "\n\n... Press ENTER to continue"
+  - name: restart-pane
+    commands:
+      - display "#{log_info} Restarting pane"
+      - "respawnp -k -c #{pane_current_path}"
+items:
+  - name: Run
+    key: space
+    command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"command-prompt\\\\\"\""
+  - name: Last window
+    key: tab
+    command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"last-window\\\\\"\""
+  - name: Last pane
+    key: "`"
+    command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"last-pane\\\\\"\""
+  - name: Copy
+    key: c
+    menu:
+      - name: Copy
+        key: c
+        # Wrapped via the learn-wrapper — flashes the direct keybinding
+        # alongside the command when picked. See header of this file.
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh 'copy-mode'\""
+      - name: List buffers
+        key: "#"
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"list-buffers\\\\\"\""
+  - separator: true
+  - name: +Windows
+    key: w
+    menu:
+      - name: Last
+        key: tab
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"last-window\\\\\"\""
+      - name: Choose
+        key: w
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"choose-tree -Zw\\\\\"\""
+      - name: Previous
+        key: p
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"previous-window\\\\\"\""
+      - name: Next
+        key: n
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"next-window\\\\\"\""
+      - name: New
+        key: c
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"neww -c #{pane_current_path}\\\\\"\""
+      - separator: true
+      - name: +Layout
+        key: l
+        menu:
+          - name: Next
+            key: l
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"nextl\\\\\"\""
+            transient: true
+          - name: Tiled
+            key: t
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectnl tiled\\\\\"\""
+          - name: Horizontal
+            key: h
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectl even-horizontal\\\\\"\""
+          - name: Vertical
+            key: v
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectl even-vertical\\\\\"\""
+          - name: Horizontal main
+            key: H
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectl main-horizontal\\\\\"\""
+          - name: Vertical main
+            key: V
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectl main-vertical\\\\\"\""
+      - name: Split horizontal
+        key: /
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"splitw -h -c #{pane_current_path}\\\\\"\""
+      - name: Split vertical
+        key: "-"
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"splitw -v -c #{pane_current_path}\\\\\"\""
+      - name: Rotate
+        key: o
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"rotatew\\\\\"\""
+        transient: true
+      - name: Rotate reverse
+        key: O
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"rotatew -D\\\\\"\""
+        transient: true
+      - separator: true
+      - name: Rename
+        key: R
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"command-prompt -I \\\\\"#W\\\\\" \\\\\"renamew -- \\\\\\\\\\\\\"%%\\\\\\\\\\\\\"\\\\\"\\\\\"\""
+      - name: Kill
+        key: X
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"confirm -p \\\\\"Kill window #W? (y/n)\\\\\" killw\\\\\"\""
+  - name: +Panes
+    key: p
+    menu:
+      - name: Last
+        key: tab
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"lastp\\\\\"\""
+      - name: Choose
+        key: p
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"displayp -d 0\\\\\"\""
+      - separator: true
+      - name: Left
+        key: h
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectp -L\\\\\"\""
+      - name: Down
+        key: j
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectp -D\\\\\"\""
+      - name: Up
+        key: k
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectp -U\\\\\"\""
+      - name: Right
+        key: l
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectp -R\\\\\"\""
+      - separator: true
+      - name: Zoom
+        key: z
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -Z\\\\\"\""
+      - name: +Resize
+        key: r
+        menu:
+          - name: Left
+            key: h
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -L\\\\\"\""
+            transient: true
+          - name: Down
+            key: j
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -D\\\\\"\""
+            transient: true
+          - name: Up
+            key: k
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -U\\\\\"\""
+            transient: true
+          - name: Right
+            key: l
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -R\\\\\"\""
+            transient: true
+          - name: Left more
+            key: H
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -L 10\\\\\"\""
+            transient: true
+          - name: Down more
+            key: J
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -D 10\\\\\"\""
+            transient: true
+          - name: Up more
+            key: K
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -U 10\\\\\"\""
+            transient: true
+          - name: Right more
+            key: L
+            command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"resizep -R 10\\\\\"\""
+            transient: true
+      - name: Swap left
+        key: H
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"swapp -t \\\\\"{left-of}\\\\\"\\\\\"\""
+      - name: Swap down
+        key: J
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"swapp -t \\\\\"{down-of}\\\\\"\\\\\"\""
+      - name: Swap up
+        key: K
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"swapp -t \\\\\"{up-of}\\\\\"\\\\\"\""
+      - name: Swap right
+        key: L
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"swapp -t \\\\\"{right-of}\\\\\"\\\\\"\""
+      - name: Break
+        key: "!"
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"break-pane\\\\\"\""
+      - separator: true
+      - name: Mark
+        key: m
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectp -m\\\\\"\""
+      - name: Unmark
+        key: M
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"selectp -M\\\\\"\""
+      - name: Capture
+        key: C
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"capture-pane\\\\\"\""
+      - name: Respawn pane
+        key: R
+        macro: restart-pane
+      - name: Kill
+        key: X
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"confirm -p \\\\\"Kill pane #P? (y/n)\\\\\" killp\\\\\"\""
+  - name: +Buffers
+    key: b
+    menu:
+      - name: Choose
+        key: b
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"choose-buffer -Z\\\\\"\""
+      - name: List
+        key: l
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"lsb\\\\\"\""
+      - name: Paste
+        key: p
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"pasteb\\\\\"\""
+  - name: +Sessions
+    key: s
+    menu:
+      - name: Choose
+        key: s
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"choose-tree -Zs\\\\\"\""
+      - name: New
+        key: N
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"new\\\\\"\""
+      - name: Rename
+        key: r
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"rename\\\\\"\""
+  - name: +Client
+    key: C
+    menu:
+      - name: Choose
+        key: c
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"choose-client -Z\\\\\"\""
+      - name: Last
+        key: l
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"switchc -l\\\\\"\""
+      - name: Previous
+        key: p
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"switchc -p\\\\\"\""
+      - name: Next
+        key: n
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"switchc -n\\\\\"\""
+      - separator: true
+      - name: Refresh
+        key: R
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"refresh\\\\\"\""
+      - name: +Plugins
+        key: P
+        menu:
+          - name: Install
+            key: i
+            command:
+              run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/install_plugins
+          - name: Update
+            key: u
+            command:
+              run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/update_plugins
+          - name: Clean
+            key: c
+            command:
+              run-shell $TMUX_PLUGIN_MANAGER_PATH/tpm/bindings/clean_plugins
+      - name: Detach
+        key: D
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"detach\\\\\"\""
+      - name: Suspend
+        key: Z
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"suspendc\\\\\"\""
+      - separator: true
+      - name: Reload config
+        key: r
+        macro: reload-config
+      - name: Customize
+        key: ","
+        command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"customize-mode -Z\\\\\"\""
+  - separator: true
+  - name: Time
+    key: T
+    command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"clock-mode\\\\\"\""
+  - name: Show messages
+    key: "~"
+    command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"show-messages\\\\\"\""
+  - name: +Keys
+    key: "?"
+    command: "run-shell \"$HOME/bin/tmux-which-key-learn.sh \\\\\"list-keys -N\\\\\"\""

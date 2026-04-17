@@ -242,6 +242,28 @@ set -g @continuum-restore 'on'
 # Popup menu of keybinding hints after pressing prefix (Ctrl-Space),
 # inspired by which-key.nvim. Requires tmux >= 3.2 and python3.
 set -g @plugin 'alexwforsythe/tmux-which-key'
+# tmux-which-key: learn-wrapper setup
+# -----------------------------------
+# Enable the plugin's XDG layout so its config.yaml lives at
+#   ~/.config/tmux/plugins/tmux-which-key/config.yaml
+# (tracked by yadm), not inside ~/.tmux/plugins/tmux-which-key/
+# (gitignored and clobbered by reinstalls). Every menu entry in that
+# YAML is wrapped through ~/bin/tmux-which-key-learn.sh, which
+# flashes the underlying tmux command AND its keybinding each time
+# you pick something from the menu — turning the plugin from a
+# "permanent launcher" into a teaching aid that nudges you toward
+# the direct shortcuts.
+#
+# Companion files (all yadm-tracked):
+#   ~/bin/tmux-which-key-learn.sh       — runtime flash+dispatch
+#   ~/bin/wrap-tmux-which-key-yaml.py   — rewrites YAML entries to
+#                                          call the helper
+#   ~/.config/tmux/plugins/tmux-which-key/config.yaml
+#                                       — generated YAML (see its
+#                                          header for the escape
+#                                          chain and regeneration
+#                                          instructions)
+set -g @tmux-which-key-xdg-enable 1
 
 # prefix + ? -> searchable list of keybindings via fzf (overrides default list-keys).
 # Only binds if fzf is installed.
