@@ -213,3 +213,16 @@ set -g @plugin 'alexwforsythe/tmux-which-key'
 # prefix + ? -> searchable list of keybindings via fzf (overrides default list-keys).
 # Only binds if fzf is installed.
 if -b 'command -v fzf > /dev/null 2>&1' "bind ? display-popup -E -w 80% -h 80% 'tmux list-keys -N | sort | fzf'"
+
+# extrakto: prefix + Tab opens an fzf popup over the current pane's
+# scrollback + visible text. Filter by typing, Enter copies the match
+# (OSC 52 flows to system clipboard via set-clipboard=on above).
+# Designed to sidestep mouse-selection problems in split panes.
+set -g @plugin 'laktak/extrakto'
+
+# tmux-thumbs: overlays letter hints on URLs, paths, hashes, IPs, etc.
+# in the current pane; press the hint to copy that fragment.
+# Default trigger is prefix + Space, which clashes with oh-my-tmux's
+# next-layout binding, so remap to prefix + T (T for thumbs).
+set -g @plugin 'fcsonline/tmux-thumbs'
+set -g @thumbs-key T
