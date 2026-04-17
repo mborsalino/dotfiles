@@ -145,6 +145,16 @@ bind-key -n C-\ if-shell "$is_vim" "send-keys C-\\" "select-pane -l"
 # Send commands to a nested tmux instance
 bind-key -n C-^ send-prefix \; send-prefix
 
+# Disable oh-my-tmux auto-git-update of plugins (it wiped ~/.tmux/plugins once).
+# To manage plugins manually, use tpm's keybindings inside tmux:
+#   prefix + I          install plugins declared below (also refreshes tmux env)
+#   prefix + U          update installed plugins (git pull)
+#   prefix + Alt + u    uninstall plugins no longer listed below
+# (prefix is Ctrl-Space in this config)
+setenv -g tmux_conf_update_plugins_on_launch false
+setenv -g tmux_conf_update_plugins_on_reload false
+setenv -g tmux_conf_uninstall_plugins_on_reload false
+
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 set -g @continuum-restore 'on'
