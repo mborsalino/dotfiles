@@ -158,3 +158,11 @@ setenv -g tmux_conf_uninstall_plugins_on_reload false
 set -g @plugin 'tmux-plugins/tmux-resurrect'
 set -g @plugin 'tmux-plugins/tmux-continuum'
 set -g @continuum-restore 'on'
+
+# Popup menu of keybinding hints after pressing prefix (Ctrl-Space),
+# inspired by which-key.nvim. Requires tmux >= 3.2 and python3.
+set -g @plugin 'alexwforsythe/tmux-which-key'
+
+# prefix + ? -> searchable list of keybindings via fzf (overrides default list-keys).
+# Only binds if fzf is installed.
+if -b 'command -v fzf > /dev/null 2>&1' "bind ? display-popup -E -w 80% -h 80% 'tmux list-keys -N | sort | fzf'"
