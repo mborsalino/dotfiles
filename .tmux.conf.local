@@ -274,13 +274,13 @@ if -b 'command -v fzf > /dev/null 2>&1' "bind ? display-popup -E -w 80% -h 80% '
 # (OSC 52 flows to system clipboard via set-clipboard=on above).
 # Designed to sidestep mouse-selection problems in split panes.
 set -g @plugin 'laktak/extrakto'
-# Route extrakto's copy through a tmux paste buffer rather than the
-# default auto-detected xclip/xsel/clip.exe. Reason: remote hosts
-# often lack xclip, causing 'returned 127' errors on selection. With
-# set-clipboard=on, tmux's own load-buffer emits OSC 52 to the
-# terminal, so the clipboard path works identically locally AND over
-# SSH without depending on any host-side clipboard tooling.
-set -g @extrakto_clip_tool 'tmux load-buffer -'
+# Route extrakto's copy through ~/bin/tmux-extrakto-copy-osc52.sh,
+# a helper that saves the selection into a tmux paste buffer AND
+# emits an OSC 52 escape so the outer terminal emulator writes the
+# text to the system clipboard. Portable across machines without
+# xclip / xsel / pbcopy / clip.exe (see the script header for the
+# full rationale and the clipboard chain).
+set -g @extrakto_clip_tool '$HOME/bin/tmux-extrakto-copy-osc52.sh'
 set -g @extrakto_clip_tool_run 'fg'
 
 # tmux-thumbs: overlays letter hints on URLs, paths, hashes, IPs, etc.
