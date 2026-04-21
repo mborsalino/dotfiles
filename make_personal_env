@@ -898,7 +898,7 @@ if (( MDBOOK == 1 )); then
     log_progress "MDBOOK"
     module load rust
     mkdir -p $opt_root/$os/mdbook/
-    cargo install mdbook
+    cargo install mdbook --version "^0.5"
     mv $cargo_home/bin/mdbook $opt_root/$os/mdbook/
     mkdir -p $modulefiles_os_root/mdbook
     cat << EOM > $modulefiles_os_root/mdbook/latest
