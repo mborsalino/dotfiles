@@ -256,7 +256,7 @@ set -g @plugin 'alexwforsythe/tmux-which-key'
 #
 # Companion files (all yadm-tracked):
 #   ~/bin/tmux-which-key-learn.sh       — runtime flash+dispatch
-#   ~/bin/wrap-tmux-which-key-yaml.py   — rewrites YAML entries to
+#   ~/bin/tmux-which-key-wrap-yaml.py   — rewrites YAML entries to
 #                                          call the helper
 #   ~/.config/tmux/plugins/tmux-which-key/config.yaml
 #                                       — generated YAML (see its

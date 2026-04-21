@@ -73,7 +73,7 @@
 #       set -g @tmux-which-key-xdg-enable 1
 # 3. Regenerate the YAML with every command wrapped by running the
 #    companion tool:
-#       python3 ~/bin/wrap-tmux-which-key-yaml.py  \
+#       python3 ~/bin/tmux-which-key-wrap-yaml.py  \
 #           < ~/.config/tmux/plugins/tmux-which-key/config.yaml \
 #           > /tmp/config.wrapped.yaml
 #       cp /tmp/config.wrapped.yaml \
@@ -81,7 +81,7 @@
 # 4. Rebuild the menu (regenerates init.tmux and reloads vars):
 #       ~/.tmux/plugins/tmux-which-key/plugin.sh.tmux
 #
-# See ~/bin/wrap-tmux-which-key-yaml.py for the escape-chain details
+# See ~/bin/tmux-which-key-wrap-yaml.py for the escape-chain details
 # and why the YAML source has ugly 4-backslash sequences.
 #
 # Matching caveats

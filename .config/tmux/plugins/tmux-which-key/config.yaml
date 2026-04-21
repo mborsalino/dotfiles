@@ -52,7 +52,7 @@
 # After editing any `command:` in this file, regenerate the wrapped
 # form with the companion Python tool, then rebuild the menu:
 #
-#   python3 ~/bin/wrap-tmux-which-key-yaml.py \
+#   python3 ~/bin/tmux-which-key-wrap-yaml.py \
 #       < ~/.config/tmux/plugins/tmux-which-key/config.yaml \
 #       > /tmp/config.wrapped.yaml
 #
@@ -67,7 +67,7 @@
 # See also
 # --------
 #   ~/bin/tmux-which-key-learn.sh       — the runtime wrapper script
-#   ~/bin/wrap-tmux-which-key-yaml.py   — the wrap tool
+#   ~/bin/tmux-which-key-wrap-yaml.py   — the wrap tool
 #   ~/.tmux.conf.local                  — enables XDG path via
 #                                         `set -g @tmux-which-key-xdg-enable 1`
 # =====================================================================

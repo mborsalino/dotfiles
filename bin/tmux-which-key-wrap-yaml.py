@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-wrap-tmux-which-key-yaml.py
+tmux-which-key-wrap-yaml.py
 ===========================
 Rewrite every `command:` line in a tmux-which-key config.yaml so it
 dispatches through the learn-wrapper at `~/bin/tmux-which-key-learn.sh`.
@@ -10,7 +10,7 @@ teaching aid instead of a permanent crutch.
 
 Usage
 -----
-    python3 ~/bin/wrap-tmux-which-key-yaml.py  \\
+    python3 ~/bin/tmux-which-key-wrap-yaml.py  \\
         < ~/.config/tmux/plugins/tmux-which-key/config.yaml \\
         > /tmp/config.wrapped.yaml
 
@@ -155,4 +155,4 @@ if __name__ == '__main__':
     data = sys.stdin.read()
     result, w = process(data)
     sys.stdout.write(result)
-    sys.stderr.write(f'[wrap_wk_commands] wrapped={w}\n')
+    sys.stderr.write(f'[tmux-which-key-wrap-yaml] wrapped={w}\n')
