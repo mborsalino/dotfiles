@@ -87,6 +87,10 @@ call plug#end()
 "----------------------------------------------------------------------------------------------------------------------"
 " Global Settings
 "----------------------------------------------------------------------------------------------------------------------"
+" Disable syntax highlighting of code inside Python docstrings (>>> doctests).
+" This is a vim legacy syntax setting (python.vim), active alongside treesitter.
+let g:python_no_doctest_code_highlight = 1
+
 " make backspace work as expected
   set backspace=indent,eol,start
 
