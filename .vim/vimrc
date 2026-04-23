@@ -29,7 +29,7 @@ Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 " Plug 'weynhamz/vim-plugin-minibufexpl'
 Plug 'airblade/vim-rooter'
-Plug 'airblade/vim-gitgutter'
+" Plug 'airblade/vim-gitgutter'  " REMOVED — replaced by gitsigns.nvim (lua)
 Plug 'chrisbra/csv.vim'
 
 Plug 'rust-lang/rust.vim'
@@ -563,16 +563,7 @@ let g:rooter_patterns = ['.git']
 let g:rooter_manual_only = 1
 nnoremap <silent> <Leader>R :Rooter<CR>
 
-" Gitgutter
-" ---------
-nmap <Leader>hn <Plug>(GitGutterNextHunk)
-nmap <Leader>hp <Plug>(GitGutterPrevHunk)
-nmap <Leader>hv <Plug>(GitGutterPreviewHunk)
-" Colors in preview window
-highlight diffAdded ctermfg=57
-highlight diffChanged ctermfg=57 ctermbg=58
-highlight diffRemoved ctermfg=166
-let g:gitgutter_preview_win_floating = 1
+" Gitsigns (replaced vim-gitgutter, see lua/plugins/nav/gitsigns.lua)
 " Refresh every 500ms (default=4s, shared with swap file update)
 set updatetime=500
 
@@ -685,12 +676,17 @@ call quickui#menu#install('&Search', [
 			\ ])
 
 call quickui#menu#install('&Git', [
-			\ [ "&Next Hunk\t\\hn", 'GitGutterNextHunk', 'Jump to next changed hunk' ],
-			\ [ "&Prev Hunk\t\\hp", 'GitGutterPrevHunk', 'Jump to previous changed hunk' ],
-			\ [ "Pre&view Hunk\t\\hv", 'GitGutterPreviewHunk', 'Preview hunk changes' ],
+			\ [ "&Next Hunk\t\\hn", 'Gitsigns next_hunk', 'Jump to next changed hunk' ],
+			\ [ "&Prev Hunk\t\\hp", 'Gitsigns prev_hunk', 'Jump to previous changed hunk' ],
+			\ [ "Pre&view Hunk\t\\hv", 'Gitsigns preview_hunk', 'Preview hunk changes' ],
 			\ [ "--", ],
-			\ [ "&Undo Hunk", 'GitGutterUndoHunk', 'Revert hunk to git version' ],
-			\ [ "&Stage Hunk", 'GitGutterStageHunk', 'Stage hunk for commit' ],
+			\ [ "&Undo Hunk", 'Gitsigns undo_stage_hunk', 'Undo staged hunk' ],
+			\ [ "&Stage Hunk", 'Gitsigns stage_hunk', 'Stage hunk for commit' ],
+			\ [ "&Reset Hunk", 'Gitsigns reset_hunk', 'Revert hunk to git version' ],
+			\ [ "Se&lect Hunk", 'Gitsigns select_hunk', 'Select hunk as text object' ],
+			\ [ "--", ],
+			\ [ "Toggle Line &Blame", 'Gitsigns toggle_current_line_blame', 'Show/hide blame at end of line' ],
+			\ [ "&Diff This\t\\hd", 'Gitsigns diffthis', 'Diff current file against index' ],
 			\ ])
 
 call quickui#menu#install('&Fold', [
@@ -743,6 +739,6 @@ nnoremap <silent><space><space> :call quickui#menu#open()<cr>
 
 nnoremap <silent>K :call quickui#tools#clever_context('k', g:context_menu_k, {})<cr>
 
-
-
-
+" DEBUG: profile neovim exit to diagnose intermittent 100% CPU hang on :q
+" TODO: REMOVE THIS once the root cause is found
+autocmd VimLeavePre * profile start /tmp/nvim-exit.log | profile func * | profile file *
