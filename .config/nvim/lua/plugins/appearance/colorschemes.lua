@@ -20,6 +20,9 @@ return {
   -- base16 colorschemes
   { 'RRethy/nvim-base16' },
 
+  -- catppuccin colorscheme (official, full palette — not the base16 approximation)
+  { 'catppuccin/nvim', name = 'catppuccin' },
+
   -- rose-pine colorscheme
   { 'rose-pine/neovim', name='rose-pine'},
 
