@@ -26,6 +26,9 @@ return {
   -- rose-pine colorscheme
   { 'rose-pine/neovim', name='rose-pine'},
 
+  -- iceberg colorscheme
+  { 'cocopon/iceberg.vim' },
+
   -- zenbones colorscheme
   { 'mcchrish/zenbones.nvim',
       dependencies = { "rktjmp/lush.nvim" }
