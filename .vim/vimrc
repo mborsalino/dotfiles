@@ -33,7 +33,7 @@ Plug 'airblade/vim-rooter'
 Plug 'chrisbra/csv.vim'
 
 Plug 'rust-lang/rust.vim'
-Plug 'ludovicchabant/vim-gutentags'
+" Plug 'ludovicchabant/vim-gutentags'  " REMOVED — LSP handles navigation; ctags was indexing entire monolith on exit
 " Plug 'Yilin-Yang/vim-markbar'
 Plug 'skywind3000/vim-quickui' 
 
@@ -738,7 +738,3 @@ let g:context_menu_k = [
 nnoremap <silent><space><space> :call quickui#menu#open()<cr>
 
 nnoremap <silent>K :call quickui#tools#clever_context('k', g:context_menu_k, {})<cr>
-
-" DEBUG: profile neovim exit to diagnose intermittent 100% CPU hang on :q
-" TODO: REMOVE THIS once the root cause is found
-autocmd VimLeavePre * profile start /tmp/nvim-exit.log | profile func * | profile file *

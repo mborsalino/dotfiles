@@ -138,6 +138,8 @@ return {
     })
 
     -- configure jedi (python intellisense)
+    -- .git is intentionally excluded from root_markers to prevent jedi from
+    -- using the monolith git root as workspace and indexing the entire repo
     vim.lsp.config("jedi-language-server", {
       cmd = { vim.fn.stdpath("data") .. "/mason/bin/jedi-language-server" },
       filetypes = { "python" },
@@ -147,7 +149,6 @@ return {
         "setup.cfg",
         "requirements.txt",
         "Pipfile",
-        ".git",
       }
     })
 
