@@ -188,8 +188,11 @@ highlight TrailingWhitespace guibg=#444444 ctermbg=238
 let g:trailing_ws_enabled = 1
 
 function! ApplyTrailingWhitespace()
-    if g:trailing_ws_enabled
+    " Only apply to normal file buffers (skip plugin UIs, popups, terminals)
+    if g:trailing_ws_enabled && &buftype ==# ''
         match TrailingWhitespace /\s\+\%#\@<!$/
+    else
+        match none
     endif
 endfunction
 
