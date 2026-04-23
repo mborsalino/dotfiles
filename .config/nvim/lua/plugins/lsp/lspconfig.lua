@@ -10,8 +10,13 @@ return {
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
     -- disable logging to avoid log file to grow indefinitely
-    -- Turn this one on in vim by typing :lua vim.lsp.set_log_level("debug")
-    vim.lsp.set_log_level("off")
+    -- TODO: remove 0.11 branch once fully migrated to 0.12 (summer 2026)
+    if vim.fn.has("nvim-0.12") == 1 then
+      -- 0.12+: vim.lsp.set_log_level() is deprecated
+      vim.lsp.log.set_level("off")
+    else
+      vim.lsp.set_log_level("off")
+    end
 
     local keymap = vim.keymap -- for conciseness
 
@@ -107,6 +112,7 @@ return {
             lint = {
               ignore = {'E203', -- whitespace before :
                         'E228', -- space around modulo
+                        'E402', -- module import not at top of file
                      }
             }
           }
@@ -161,8 +167,48 @@ return {
       "jedi-language-server",
     })
 
-    -- Show diagnostics in virtual lines
-    vim.diagnostic.config({virtual_text = true, virtual_lines = false})
+    -- Show diagnostics in virtual text.
+    -- Sign icons are configured in neo_tree.lua via vim.diagnostic.config().
+    vim.diagnostic.config({
+      virtual_text = true,
+      virtual_lines = false,
+      severity_sort = true,
+    })
+
+    -- TODO: remove these commands once fully migrated to 0.12 (summer 2026)
+    -- In 0.12 with native vim.lsp.config()/enable(), nvim-lspconfig no longer
+    -- provides :LspRestart/:LspStop/:LspInfo, so we define our own.
+    if vim.fn.has("nvim-0.12") == 1 then
+      vim.api.nvim_create_user_command("LspStop", function()
+        for _, client in ipairs(vim.lsp.get_clients()) do
+          client:stop()
+        end
+      end, { desc = "Stop all LSP clients" })
+
+      vim.api.nvim_create_user_command("LspRestart", function()
+        local clients = vim.lsp.get_clients({ bufnr = 0 })
+        for _, client in ipairs(clients) do
+          local names = { client.name }
+          client:stop()
+          vim.defer_fn(function()
+            for _, name in ipairs(names) do
+              vim.lsp.enable(name)
+            end
+          end, 500)
+        end
+      end, { desc = "Restart LSP clients for current buffer" })
+
+      vim.api.nvim_create_user_command("LspInfo", function()
+        local clients = vim.lsp.get_clients({ bufnr = 0 })
+        if #clients == 0 then
+          print("No LSP clients attached")
+          return
+        end
+        for _, client in ipairs(clients) do
+          print(string.format("%s (id=%d) root=%s", client.name, client.id, client.root_dir or "none"))
+        end
+      end, { desc = "Show LSP clients for current buffer" })
+    end
 
   end,
 }
