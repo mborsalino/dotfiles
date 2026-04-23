@@ -50,6 +50,17 @@ bind -r L resize-pane -R 5
 # setting to tmux causes backspace to now work in some systems
 set -g default-terminal "xterm-256color"
 
+# This tells tmux that the outer terminal (Windows Terminal) supports 24-bit
+# RGB color, so tmux should pass true color escape sequences through instead
+# of downgrading them to 256-color approximations. Without this, neovim
+# colorschemes that rely on precise hex colors (e.g. Catppuccin) get mangled
+# into flat greys because their RGB values are rounded to the nearest
+# 256-color palette entry.
+# terminal-features is the modern way (tmux 3.2+), terminal-overrides is the
+# legacy fallback.
+set -as terminal-features ",xterm-256color:RGB"
+set -sa terminal-overrides ",xterm-256color:Tc"
+
 # RESTORE THE FOLLOWING
 # # colors for pane borders
 # setw -g pane-border-style fg=green,bg=black
