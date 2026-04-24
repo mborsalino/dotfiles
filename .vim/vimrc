@@ -131,6 +131,9 @@ let g:python_no_doctest_code_highlight = 1
 " highlight all searches (hlsearch/nohlsearch)
     set hlsearch 
 
+" Clear search highlighting (mnemonic: clear search)
+nnoremap <Leader>cs :nohlsearch<CR>
+
 "  use space as leader key
 :let mapleader = " "
 
