@@ -1,4 +1,4 @@
-# git-fzf.bash -- fzf-powered tab completions for git diff, sdiff, and add
+# git-fzf.bash -- fzf-powered tab completions for git file-taking commands
 #
 # Overview:
 #   Provides smart file autocompletion for common git commands using fzf
@@ -6,14 +6,22 @@
 #   if fzf is not available.
 #
 # Behavior:
-#   git diff <Tab>           -> unstaged modified files
-#   git diff --cached <Tab>  -> staged files
-#   git sdiff <Tab>          -> unstaged modified files (side-by-side alias)
-#   git sdiff --cached <Tab> -> staged files
-#   git add <Tab>            -> untracked + unstaged files
+#   git diff <Tab>              -> unstaged modified files
+#   git diff --cached <Tab>     -> staged files
+#   git sdiff <Tab>             -> unstaged modified files (side-by-side alias)
+#   git sdiff --cached <Tab>    -> staged files
+#   git add <Tab>               -> untracked + unstaged files
+#   git reset <Tab>             -> staged files (unstage)
+#   git restore <Tab>           -> unstaged modified files (discard edits)
+#   git restore --staged <Tab>  -> staged files (unstage)
+#   git checkout -- <Tab>       -> unstaged modified files (legacy restore)
+#
+#   Ref-operating invocations (git reset --hard, git checkout <branch>,
+#   git restore --source=...) fall through to default git completion.
 #
 # fzf display:
-#   Shows filenames for fuzzy matching, inserts full path (relative to cwd).
+#   Shows filenames for fuzzy matching, inserts full path (relative to cwd,
+#   with ../ prefixes for files outside the current subtree).
 #
 # Fallback:
 #   If fzf is not in PATH, falls through to default git completion.
@@ -46,15 +54,7 @@
 #   - fzf (optional -- graceful fallback without it)
 
 # ---------------------------------------------------------------------------
-# _git_fzf_get_files: returns the list of relevant files for a given command
-#
-# Arguments:
-#   $1 -- git subcommand (diff, sdiff, add)
-#
-# How it decides which files to show:
-#   - diff/sdiff: unstaged modified files (status codes in column 2)
-#   - diff/sdiff --cached: staged files (status codes in column 1)
-#   - add: untracked (??) and unstaged modified files
+# File-set helpers
 #
 # git status --porcelain format reminder:
 #   Column 1 = staging area status, Column 2 = working tree status
@@ -68,45 +68,53 @@
 #   e.g. " M foo.py" = unstaged modification
 #        "M  foo.py" = staged modification
 #        "?? foo.py" = untracked file
+#
+# All helpers output repo-root-relative paths; _git_fzf_cwd_relative
+# translates them to cwd-relative paths (with ../ prefixes as needed).
 # ---------------------------------------------------------------------------
-_git_fzf_get_files() {
-    local cmd="$1"
 
-    # git status --porcelain returns paths relative to the repo root.
-    # We need paths relative to cwd so they work with git diff/add,
-    # including ../ prefixes for files outside the current subtree.
+# Rewrite a stream of repo-root-relative paths as cwd-relative paths.
+# Paths outside the current subtree gain ../ prefixes.
+_git_fzf_cwd_relative() {
     local root
     root=$(git rev-parse --show-toplevel 2>/dev/null)
-
-    local raw_files
-    case "$cmd" in
-        diff|sdiff)
-            if [[ " ${COMP_WORDS[*]} " == *" --cached "* ]] || \
-               [[ " ${COMP_WORDS[*]} " == *" --staged "* ]]; then
-                raw_files=$(git status --porcelain --no-renames 2>/dev/null \
-                    | grep '^[MADRC]' \
-                    | cut -c4-)
-            else
-                raw_files=$(git status --porcelain --no-renames 2>/dev/null \
-                    | grep '^ [MADRC]\|^MM' \
-                    | cut -c4-)
-            fi
-            ;;
-        add)
-            raw_files=$(git status --porcelain --no-renames 2>/dev/null \
-                | grep '^ [MADRC]\|^??' \
-                | cut -c4-)
-            ;;
-    esac
-
-    echo "$raw_files" | while IFS= read -r f; do
+    [[ -z "$root" ]] && return 0
+    while IFS= read -r f; do
         [[ -z "$f" ]] && continue
         realpath --relative-to=. "$root/$f"
     done
 }
 
+# Unstaged working-tree modifications (column 2 has a change).
+_git_fzf_unstaged_files() {
+    git status --porcelain --no-renames 2>/dev/null \
+        | grep '^ [MADRC]\|^MM' \
+        | cut -c4- \
+        | _git_fzf_cwd_relative
+}
+
+# Staged changes (column 1 has a change).
+_git_fzf_staged_files() {
+    git status --porcelain --no-renames 2>/dev/null \
+        | grep '^[MADRC]' \
+        | cut -c4- \
+        | _git_fzf_cwd_relative
+}
+
+# Unstaged modifications plus untracked files (the set `git add` accepts).
+_git_fzf_addable_files() {
+    git status --porcelain --no-renames 2>/dev/null \
+        | grep '^ [MADRC]\|^??' \
+        | cut -c4- \
+        | _git_fzf_cwd_relative
+}
+
 # ---------------------------------------------------------------------------
 # _git_fzf_complete: core completion logic
+#
+# Arguments:
+#   $1 -- prompt label shown in fzf (e.g. "diff", "restore --staged")
+#   $2 -- name of a file-set function to call (e.g. _git_fzf_staged_files)
 #
 # Gets the relevant file list, pipes through fzf for fuzzy selection.
 # On success, sets COMPREPLY with the selected path.
@@ -130,12 +138,13 @@ _git_fzf_get_files() {
 # COMPREPLY is the bash array that holds completion results.
 # ---------------------------------------------------------------------------
 _git_fzf_complete() {
-    local cmd="$1"
+    local prompt="$1"
+    local files_fn="$2"
     local cur="${COMP_WORDS[COMP_CWORD]}"
 
     # Get the relevant file list; bail if empty
     local files
-    files=$(_git_fzf_get_files "$cmd")
+    files=$("$files_fn")
     [[ -z "$files" ]] && return 1
 
     # Run fzf for interactive selection
@@ -143,7 +152,7 @@ _git_fzf_complete() {
     selected=$(echo "$files" | fzf \
         --height=40% \
         --reverse \
-        --prompt="$cmd > " \
+        --prompt="$prompt > " \
         --query="$cur" \
         --select-1 \
         --exit-0 \
@@ -188,31 +197,114 @@ _git_fzf_fallback() {
 }
 
 # ---------------------------------------------------------------------------
+# _git_fzf_has_word: true if $1 appears as a prior word on the command line
+# (not the word currently being typed).
+# ---------------------------------------------------------------------------
+_git_fzf_has_word() {
+    local target="$1" i
+    for ((i=0; i<COMP_CWORD; i++)); do
+        [[ "${COMP_WORDS[i]}" == "$target" ]] && return 0
+    done
+    return 1
+}
+
+# ---------------------------------------------------------------------------
+# _git_fzf_has_word_prefix: true if any prior word starts with $1.
+# Used to catch --long=VALUE forms where has_word's exact match misses.
+# ---------------------------------------------------------------------------
+_git_fzf_has_word_prefix() {
+    local prefix="$1" i
+    for ((i=0; i<COMP_CWORD; i++)); do
+        [[ "${COMP_WORDS[i]}" == "$prefix"* ]] && return 0
+    done
+    return 1
+}
+
+# ---------------------------------------------------------------------------
+# _git_fzf_reset_is_file_mode: heuristic for `git reset`
+#
+# `git reset <file>` unstages (file mode). `git reset --hard`, `git reset
+# HEAD~1`, `git reset <sha>` etc. are ref-operations and should fall
+# through to default completion. Assume file mode unless we see something
+# that's clearly a ref op.
+# ---------------------------------------------------------------------------
+_git_fzf_reset_is_file_mode() {
+    local i w
+    for ((i=2; i<COMP_CWORD; i++)); do
+        w="${COMP_WORDS[i]}"
+        case "$w" in
+            --)                                      return 0 ;;  # after -- everything is files
+            --hard|--soft|--mixed|--merge|--keep)    return 1 ;;
+            --patch|-p|-N)                           return 1 ;;
+            HEAD|HEAD~*|HEAD^*|-)                    return 1 ;;
+            *@*|*~*|*^*)                             return 1 ;;  # ref-ish syntax
+        esac
+        # Bare hex string (>=7 chars) looks like a SHA
+        [[ "$w" =~ ^[0-9a-f]{7,40}$ ]] && return 1
+    done
+    return 0
+}
+
+# ---------------------------------------------------------------------------
 # _git_fzf_dispatch: main entry point for git tab completion
 #
-# Routes to fzf-powered completion for diff/sdiff/add.
-# Falls back to default git completion for everything else, and also
-# when:
+# Routes to fzf-powered completion for file-taking subcommands. Falls
+# back to default git completion otherwise, including when:
 #   - fzf is not installed
 #   - the current word is a flag (e.g. --cached, --stat)
-#   - no diff-able/addable files exist
+#   - the invocation looks ref-operating rather than file-operating
+#   - no relevant files exist
 # ---------------------------------------------------------------------------
 _git_fzf_dispatch() {
     local subcmd="${COMP_WORDS[1]}"
     local cur="${COMP_WORDS[COMP_CWORD]}"
 
-    # If fzf is not available, always use default completion
     if ! command -v fzf &>/dev/null; then
         _git_fzf_fallback
         return
     fi
 
-    # For diff/sdiff/add: use fzf (unless completing a flag).
-    # For everything else: fall back to default git completion.
+    # If the user is completing a flag, defer to default git completion.
+    [[ "$cur" == -* ]] && { _git_fzf_fallback; return; }
+
     case "$subcmd" in
-        diff|sdiff|add)
-            [[ "$cur" == -* ]] && { _git_fzf_fallback; return; }
-            _git_fzf_complete "$subcmd" || _git_fzf_fallback
+        diff|sdiff)
+            if _git_fzf_has_word --cached || _git_fzf_has_word --staged; then
+                _git_fzf_complete "$subcmd --cached" _git_fzf_staged_files || _git_fzf_fallback
+            else
+                _git_fzf_complete "$subcmd" _git_fzf_unstaged_files || _git_fzf_fallback
+            fi
+            ;;
+        add)
+            _git_fzf_complete add _git_fzf_addable_files || _git_fzf_fallback
+            ;;
+        reset)
+            if _git_fzf_reset_is_file_mode; then
+                _git_fzf_complete reset _git_fzf_staged_files || _git_fzf_fallback
+            else
+                _git_fzf_fallback
+            fi
+            ;;
+        restore)
+            if _git_fzf_has_word --staged || _git_fzf_has_word -S; then
+                _git_fzf_complete "restore --staged" _git_fzf_staged_files || _git_fzf_fallback
+            elif _git_fzf_has_word_prefix --source || _git_fzf_has_word -s; then
+                # --source implies restoring from a ref; let default completion handle it.
+                _git_fzf_fallback
+            else
+                _git_fzf_complete restore _git_fzf_unstaged_files || _git_fzf_fallback
+            fi
+            ;;
+        checkout)
+            # checkout is only unambiguously file-mode when `--` is typed
+            # *immediately* after the subcommand (COMP_WORDS[2] == "--").
+            # Any other shape (git checkout <ref> -- <file>, bare
+            # git checkout <tab>) is ref-ish -- defer to default completion.
+            if [[ "${COMP_WORDS[2]}" == "--" ]]; then
+                _git_fzf_complete "checkout --" _git_fzf_unstaged_files || _git_fzf_fallback
+            else
+                _git_fzf_fallback
+            fi
             ;;
         *)
             _git_fzf_fallback
