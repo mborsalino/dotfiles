@@ -71,6 +71,8 @@
     cim = commit --interactive
     shove = push --force-with-lease
     state = status --short --branch --untracked-files
+    logme = "!f() { git log -i --author=\"$(git config user.email)\" --pretty=format:\"%h %Cred%d%Creset -- %s\" \"$@\"; }; f"
+    logteam = "!f() { git log -i --perl-regexp --author=\"$(paste -sd'|' ~/.config/git_team)\" --pretty=format:\"%h %Cred%d%Creset %Cblue%aN%Creset -- %s\" \"$@\"; }; f"
 
 [rerere]
     enabled = 1
