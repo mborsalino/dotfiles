@@ -73,12 +73,10 @@ _git_fzf_get_files() {
     local cmd="$1"
 
     # git status --porcelain returns paths relative to the repo root.
-    # We need paths relative to cwd so they work with git diff/add.
-    # git rev-parse --show-prefix gives our cwd relative to root (e.g. "src/stack/").
-    # We strip that prefix from each path, and skip files outside our cwd.
-    local prefix
-    prefix=$(git rev-parse --show-prefix 2>/dev/null)
-    # prefix is empty at repo root, or "some/path/" in a subdirectory
+    # We need paths relative to cwd so they work with git diff/add,
+    # including ../ prefixes for files outside the current subtree.
+    local root
+    root=$(git rev-parse --show-toplevel 2>/dev/null)
 
     local raw_files
     case "$cmd" in
@@ -101,17 +99,10 @@ _git_fzf_get_files() {
             ;;
     esac
 
-    if [[ -z "$prefix" ]]; then
-        # At repo root: paths are already correct
-        echo "$raw_files"
-    else
-        # In a subdirectory: strip the prefix, skip files outside cwd
-        echo "$raw_files" | while IFS= read -r f; do
-            if [[ "$f" == "$prefix"* ]]; then
-                echo "${f#"$prefix"}"
-            fi
-        done
-    fi
+    echo "$raw_files" | while IFS= read -r f; do
+        [[ -z "$f" ]] && continue
+        realpath --relative-to=. "$root/$f"
+    done
 }
 
 # ---------------------------------------------------------------------------
