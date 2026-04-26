@@ -26,8 +26,8 @@ return {
   -- rose-pine colorscheme
   { 'rose-pine/neovim', name='rose-pine'},
 
-  -- iceberg colorscheme
-  { 'cocopon/iceberg.vim' },
+  -- iceberg colorscheme (priority ensures it loads before vimrc sets colorscheme)
+  { 'cocopon/iceberg.vim', priority = 1000, lazy = false },
 
   -- zenbones colorscheme
   { 'mcchrish/zenbones.nvim',

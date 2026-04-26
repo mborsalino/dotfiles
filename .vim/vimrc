@@ -176,11 +176,7 @@ if has("gui_running")
 endif
 
 " set color scheme
-" colorscheme slate
-let g:seoul256_background = 235
-let g:seoul256_light_background = 256
-" let g:seoul256_srgb = 1
-colorscheme seoul256
+" Colorscheme is set in init.lua (after Lazy loads plugins)
 
 " Highlight trailing whitespace with a subtle dark grey background.
 " Uses match instead of set list so tabs aren't affected.

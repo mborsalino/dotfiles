@@ -1,5 +1,19 @@
 
+-- Enable 24-bit RGB color in the TUI. Without this, colorschemes that specify
+-- hex colors (e.g. iceberg's #161821 background) fall back to the nearest
+-- 256-color approximation, which often matches the terminal's default
+-- background — making the colorscheme's background invisible.
+-- Requires a terminal that supports true color (Windows Terminal, iTerm2, etc.)
+-- and, if using tmux, RGB passthrough (configured in .tmux.conf.local).
+vim.opt.termguicolors = true
+
 require("_lazy")
+
+-- Set colorscheme here (after Lazy loads plugins, so they're available)
+-- vim.cmd("colorscheme slate")
+-- vim.g.seoul256_background = 235
+-- vim.cmd("colorscheme seoul256")
+vim.cmd("colorscheme iceberg")
 
 
 -- vim.opt.tabstop=4
