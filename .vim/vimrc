@@ -616,6 +616,8 @@ nmap <Leader>sft :CtrlSFToggle<CR>
 vmap <Leader>sfc <Plug>CtrlSFVwordPath
 " search word under cursor
 nmap <Leader>sfc <Plug>CtrlSFCwordPath
+" focus the CtrlSF results pane
+nmap <Leader>sff :CtrlSFFocus<CR>
 
 
 " 
