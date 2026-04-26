@@ -35,7 +35,8 @@ return {
                 return {
                   line.sep('', theme.win, theme.fill),
                   win.is_current() and '' or '',
-                  win.buf_name(),
+                  -- Show only filename, not full path
+                  vim.fn.fnamemodify(win.buf_name(), ":t"),
                   line.sep('', theme.win, theme.fill),
                   hl = theme.win,
                   margin = ' ',
