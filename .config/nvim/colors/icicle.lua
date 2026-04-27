@@ -43,3 +43,6 @@ vim.api.nvim_set_hl(0, "DiffDelete",  { fg = "#4e5066", bg = "#0e1019" })
 vim.api.nvim_set_hl(0, "DiffAdd",     { fg = "#FFB030", bg = "#161821" })
 vim.api.nvim_set_hl(0, "DiffChange",  { bg = "#161821" })
 vim.api.nvim_set_hl(0, "DiffText",    { fg = "#FFB030", bg = "#252a3a" })
+
+-- nvim-notify needs an explicit bg to render notification popups
+vim.api.nvim_set_hl(0, "NotifyBackground", { bg = "#161821" })
