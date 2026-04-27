@@ -133,7 +133,7 @@ let g:python_no_doctest_highlight = 1
     set hlsearch 
 
 " Clear search highlighting (mnemonic: clear search)
-nnoremap <Leader>cs :nohlsearch<CR>
+nnoremap <Leader>cs <Cmd>nohlsearch<CR>
 
 "  use space as leader key
 :let mapleader = " "
@@ -675,6 +675,8 @@ call quickui#menu#install('&Search', [
 			\ [ "--", ],
 			\ [ "&Ripgrep\t:Rg", 'Rg', 'Search with ripgrep' ],
 			\ [ "&Commits\t\\gC", 'Commits', 'Search git commits' ],
+			\ [ "--", ],
+			\ [ "Clear Search &Highlight\t\\cs", 'call feedkeys(":\<C-u>nohlsearch\<CR>", "n")', 'Clear search highlighting' ],
 			\ ])
 
 call quickui#menu#install('&Git', [
