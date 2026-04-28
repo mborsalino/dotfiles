@@ -684,7 +684,7 @@ call quickui#menu#install('&Git', [
 			\ [ "&Prev Hunk\t\\hp", 'Gitsigns prev_hunk', 'Jump to previous changed hunk' ],
 			\ [ "Pre&view Hunk\t\\hv", 'Gitsigns preview_hunk', 'Preview hunk changes' ],
 			\ [ "--", ],
-			\ [ "&Undo Hunk", 'Gitsigns undo_stage_hunk', 'Undo staged hunk' ],
+			\ [ "&Unstage Hunk", 'Gitsigns undo_stage_hunk', 'Unstage a previously staged hunk' ],
 			\ [ "&Stage Hunk", 'Gitsigns stage_hunk', 'Stage hunk for commit' ],
 			\ [ "&Reset Hunk", 'Gitsigns reset_hunk', 'Revert hunk to git version' ],
 			\ [ "Se&lect Hunk", 'Gitsigns select_hunk', 'Select hunk as text object' ],
